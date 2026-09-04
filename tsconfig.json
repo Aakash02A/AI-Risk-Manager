@@ -25,8 +25,6 @@
   },
   "include": [
     "frontend/src/**/*",
-    "frontend/vite.config.ts",
-    "server/**/*",
-    "server.ts"
+    "frontend/vite.config.ts"
   ]
 }

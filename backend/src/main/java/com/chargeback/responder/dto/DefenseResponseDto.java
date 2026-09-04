@@ -8,10 +8,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuditLogDto {
-    private String action;
-    private String details;
-    private String actor;
+public class DefenseResponseDto {
+    @JsonProperty("response_text")
+    private String responseText;
+
+    @JsonProperty("generated_by")
+    private String generatedBy;
 
     @JsonProperty("created_at")
     private LocalDateTime createdAt;

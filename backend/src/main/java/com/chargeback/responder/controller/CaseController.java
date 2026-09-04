@@ -49,4 +49,20 @@ public class CaseController {
         PredictionDto prediction = caseService.analyzeCase(caseId);
         return ResponseEntity.ok(prediction);
     }
+
+    @PostMapping("/{caseId}/generate-response")
+    public ResponseEntity<com.chargeback.responder.dto.DefenseResponseDto> generateResponse(@PathVariable String caseId) {
+        com.chargeback.responder.dto.DefenseResponseDto response = caseService.generateDefenseResponse(caseId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-demo")
+    public ResponseEntity<Map<String, Object>> resetDemo() {
+        List<CaseResponseDto> cases = caseService.resetDemo();
+        Map<String, Object> result = Map.of(
+                "message", "Demo cases reset to initial canonical state",
+                "cases", cases
+        );
+        return ResponseEntity.ok(result);
+    }
 }

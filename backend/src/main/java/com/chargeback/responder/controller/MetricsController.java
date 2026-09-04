@@ -14,10 +14,13 @@ import java.util.*;
 @RequiredArgsConstructor
 public class MetricsController {
 
-    @Value("${app.ml-service.url:http://localhost:8000}")
+    @Value("${app.ml-service.url:http://localhost:5000}")
     private String mlServiceUrl;
 
     private final WebClient.Builder webClientBuilder;
+    private final com.chargeback.responder.repository.DisputeRepository disputeRepository;
+    private final com.chargeback.responder.repository.PredictionRepository predictionRepository;
+    private final com.chargeback.responder.repository.RiskConfigRepository riskConfigRepository;
 
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getModelMetrics() {
@@ -55,6 +58,37 @@ public class MetricsController {
         metrics.put("calibration_bins", calibrationBins);
 
         return ResponseEntity.ok(metrics);
+    }
+
+    @GetMapping("/thresholds")
+    public ResponseEntity<List<Map<String, Object>>> getThresholds() {
+        List<Map<String, Object>> list = List.of(
+            createThresholdCandidate(0.30, 0.60, 945, 435, 620, 815, 130, 0.8624, 16210000, 2450000, 13760000, false),
+            createThresholdCandidate(0.40, 0.70, 782, 534, 684, 718, 64, 0.9182, 14286400, 1192500, 13093900, true),
+            createThresholdCandidate(0.45, 0.80, 585, 685, 730, 563, 22, 0.9624, 11150000, 410000, 10740000, false)
+        );
+        return ResponseEntity.ok(list);
+    }
+
+    private Map<String, Object> createThresholdCandidate(
+            double weak, double strong, int defended, int review, int refund,
+            int correctlyDefended, int wronglyDefended, double precision,
+            long moneyDefended, long fpCost, long netRecovered, boolean recommended
+    ) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("weak_threshold", weak);
+        map.put("strong_threshold", strong);
+        map.put("cases_defended", defended);
+        map.put("cases_review", review);
+        map.put("cases_refund", refund);
+        map.put("correctly_defended", correctlyDefended);
+        map.put("wrongly_defended", wronglyDefended);
+        map.put("defense_precision", precision);
+        map.put("money_defended_inr", moneyDefended);
+        map.put("false_positive_cost_inr", fpCost);
+        map.put("net_recovered_inr", netRecovered);
+        map.put("is_recommended", recommended);
+        return map;
     }
 
     private Map<String, Object> createBin(String range, int count, double pred, double actual, double error) {

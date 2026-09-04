@@ -4,11 +4,13 @@ server:
 spring:
   application:
     name: chargeback-evidence-responder
+  jackson:
+    property-naming-strategy: SNAKE_CASE
   datasource:
-    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/chargeback_responder}
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:secret}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:h2:mem:chargeback_responder;DB_CLOSE_DELAY=-1;MODE=MySQL}
+    username: ${MYSQL_USERNAME:sa}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: ${MYSQL_DRIVER:org.h2.Driver}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,7 +21,7 @@ spring:
 
 app:
   ml-service:
-    url: ${ML_SERVICE_URL:http://localhost:8000}
+    url: ${ML_SERVICE_URL:http://localhost:5000}
   thresholds:
     weak: ${WEAK_THRESHOLD:0.40}
     strong: ${STRONG_THRESHOLD:0.70}
