@@ -1,0 +1,24 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Java / Maven
+backend/target/
+*.class
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo

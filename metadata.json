@@ -1,0 +1,6 @@
+{
+  "name": "Chargeback Evidence Responder",
+  "description": "AI-powered chargeback decisioning and evidence response assistant using trained ML classification and grounded LLM defense generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

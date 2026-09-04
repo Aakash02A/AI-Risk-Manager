@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: chargeback-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: chargeback_responder
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Python ML Classifier Service (FastAPI)
+  ml-service:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    container_name: chargeback-ml
+    restart: always
+    environment:
+      - MODEL_PATH=model/chargeback_model.joblib
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Orchestration Backend & App Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chargeback-backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/chargeback_responder
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: secret
+      ML_SERVICE_URL: http://ml-service:8000
+      WEAK_THRESHOLD: 0.40
+      STRONG_THRESHOLD: 0.70
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      LLM_MODEL: gemini-3.8-flash
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql-data:
