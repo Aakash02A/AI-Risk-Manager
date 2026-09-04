@@ -1,0 +1,77 @@
+{
+  "model_name": "RandomForestClassifier",
+  "model_version": "1.0",
+  "test_cases_count": 2000,
+  "dataset_total_cases": 10000,
+  "train_split_pct": 80,
+  "test_split_pct": 20,
+  "accuracy": 0.858,
+  "precision_binary_50": 0.8855,
+  "recall_binary_50": 0.9509,
+  "roc_auc": 0.8477,
+  "confusion_matrix": {
+    "true_negative": 146,
+    "false_positive": 203,
+    "false_negative": 81,
+    "true_positive": 1570
+  },
+  "decision_thresholds": {
+    "weak_threshold": 0.4,
+    "strong_threshold": 0.7
+  },
+  "routing_breakdown": {
+    "strong_count": 1544,
+    "borderline_count": 371,
+    "weak_count": 85,
+    "strong_pct": 77.2,
+    "borderline_pct": 18.6,
+    "weak_pct": 4.2
+  },
+  "defense_metrics": {
+    "defense_precision": 0.9249,
+    "correctly_defended_count": 1428,
+    "money_defended_inr": 30347769.09,
+    "false_positive_count": 116,
+    "false_positive_cost_inr": 2311650.64,
+    "borderline_amount_inr": 8275160.62,
+    "weak_refund_amount_inr": 2150809.32,
+    "total_disputed_amount_inr": 43085389.67
+  },
+  "calibration_bins": [
+    {
+      "bin_range": "0.50-0.60",
+      "count": 122,
+      "avg_predicted_prob": 0.5385,
+      "actual_win_rate": 0.582,
+      "calibration_error": 0.0434
+    },
+    {
+      "bin_range": "0.60-0.70",
+      "count": 107,
+      "avg_predicted_prob": 0.6476,
+      "actual_win_rate": 0.6636,
+      "calibration_error": 0.016
+    },
+    {
+      "bin_range": "0.70-0.80",
+      "count": 126,
+      "avg_predicted_prob": 0.7557,
+      "actual_win_rate": 0.7778,
+      "calibration_error": 0.0221
+    },
+    {
+      "bin_range": "0.80-0.90",
+      "count": 243,
+      "avg_predicted_prob": 0.8623,
+      "actual_win_rate": 0.8642,
+      "calibration_error": 0.0019
+    },
+    {
+      "bin_range": "0.90-1.00",
+      "count": 1175,
+      "avg_predicted_prob": 0.9591,
+      "actual_win_rate": 0.9532,
+      "calibration_error": 0.0059
+    }
+  ]
+}
