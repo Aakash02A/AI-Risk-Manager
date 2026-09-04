@@ -6,11 +6,15 @@ spring:
     name: chargeback-evidence-responder
   jackson:
     property-naming-strategy: SNAKE_CASE
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   datasource:
-    url: ${MYSQL_URL:jdbc:h2:mem:chargeback_responder;DB_CLOSE_DELAY=-1;MODE=MySQL}
-    username: ${MYSQL_USERNAME:sa}
-    password: ${MYSQL_PASSWORD:}
-    driver-class-name: ${MYSQL_DRIVER:org.h2.Driver}
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/chargeback_responder?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:your_mysql_password}
+    driver-class-name: ${MYSQL_DRIVER:com.mysql.cj.jdbc.Driver}
   jpa:
     hibernate:
       ddl-auto: update

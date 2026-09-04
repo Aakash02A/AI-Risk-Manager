@@ -40,7 +40,7 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by Case ID (e.g. CB-1024)..."
+            placeholder="Search by Case ID..."
             className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
           />
         </div>
@@ -110,13 +110,6 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
             ) : (
               cases.map((c) => {
                 const decisionStyle = getDecisionBadgeColor(c.prediction?.decision);
-                const isAnalyzing = analyzingCaseId === c.case_id;
-
-                // Canonical badges for clear reference
-                const isCaseA = c.case_id === 'CB-1024';
-                const isCaseB = c.case_id === 'CB-1025';
-                const isCaseC = c.case_id === 'CB-1026';
-
                 return (
                   <tr
                     key={c.case_id}
@@ -128,21 +121,6 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
                     <td className="py-3 px-4 font-mono font-medium text-slate-900">
                       <div className="flex items-center space-x-1.5">
                         <span>{c.case_id}</span>
-                        {isCaseA && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
-                            Case A
-                          </span>
-                        )}
-                        {isCaseB && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-800">
-                            Case B
-                          </span>
-                        )}
-                        {isCaseC && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800">
-                            Case C
-                          </span>
-                        )}
                       </div>
                     </td>
 
