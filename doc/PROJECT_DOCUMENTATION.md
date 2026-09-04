@@ -275,8 +275,7 @@ AI-Risk-Manager/
 ├── PROJECT_DOCUMENTATION.md                   # Formal Master Build & Architecture Documentation
 ├── README.md                                  # Repository Readme & Quickstart Guide
 ├── Project audit.md                           # Technical Audit Report
-├── start.bat                                  # 1-Click Windows Dev Launcher Script
-├── run.bat                                    # 1-Click Startup & Verification Script
+├── run.bat                                    # 1-Click Windows Dev Launcher Script
 ├── docker-compose.yml                         # Container Orchestration Configuration
 ├── .env.example                               # Environment Variables Specification
 │
@@ -353,7 +352,7 @@ All REST endpoints reside on **Java Spring Boot (`http://localhost:8080`)**:
    ```
 3. **Launch React Frontend (Port 3000):**
    ```cmd
-   start.bat
+   run.bat
    ```
    *Open browser at 👉 **`http://localhost:3000`***
 

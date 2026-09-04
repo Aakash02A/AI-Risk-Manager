@@ -96,11 +96,11 @@ Evaluators can execute all system checks directly via CLI commands:
 
 | Command | Purpose | Expected Result |
 | :--- | :--- | :--- |
-| `run.bat test` | Run 14-Point API Integration Test Suite | All 14 tests PASS (`200`/`201`/`404`) |
-| `run.bat test-ml` | Evaluate ML Model Accuracy & Thresholds | Test Accuracy: 85.80% \| ROC-AUC: 0.8477 |
-| `run.bat test-db` | Verify Database Connectivity & Schema | Database schema verified & active |
-| `run.bat test-api` | Full Diagnostic Health & Real API Check | `status: "UP"`, `ml_classifier: "UP"` |
-| `run.bat build` | Production Bundle Build Check | Clean build in `dist/` directory |
+| `run.bat` | Run 1-Click Interactive Dashboard | Open browser at `http://localhost:3000` |
+| `python ml/evaluate_model.py` | Evaluate ML Model Accuracy & Thresholds | Test Accuracy: 85.80% \| ROC-AUC: 0.8477 |
+| `node database/test_connection.cjs` | Verify Database Connectivity & Schema | Database schema verified & active |
+| `GET /api/health/full` | Full Diagnostic Health & Real API Check | `status: "UP"`, `ml_classifier: "UP"` |
+| `npm run build` | Production Bundle Build Check | Clean build in `dist/` directory |
 
 ---
 
