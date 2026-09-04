@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { DisputeCase, SystemStats } from './types';
+import { Sidebar, ModuleType } from './components/Sidebar';
 import { Header } from './components/Header';
 import { StatsOverview } from './components/StatsOverview';
 import { DisputeTable } from './components/DisputeTable';
+import { ModelEvaluationView } from './components/ModelEvaluationView';
+import { RiskRatioView } from './components/RiskRatioView';
+import { AuditLogsView } from './components/AuditLogsView';
 import { CaseDetailModal } from './components/CaseDetailModal';
 import { NewCaseModal } from './components/NewCaseModal';
 import { ThresholdSettingsModal } from './components/ThresholdSettingsModal';
-import { ModelEvaluationView } from './components/ModelEvaluationView';
+import { DisputeCase, DashboardStats } from './types';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState<'operations' | 'model'>('operations');
+export function App() {
+  const [activeModule, setActiveModule] = useState<ModuleType>('operations');
   const [cases, setCases] = useState<DisputeCase[]>([]);
-  const [stats, setStats] = useState<SystemStats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Filters
+  // Filters state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReason, setSelectedReason] = useState('');
   const [selectedDecision, setSelectedDecision] = useState('');
 
-  // Modals & Active case
+  // Modals state
   const [selectedCase, setSelectedCase] = useState<DisputeCase | null>(null);
   const [isNewCaseOpen, setIsNewCaseOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -33,11 +36,25 @@ export default function App() {
   const [weakThreshold, setWeakThreshold] = useState(0.40);
   const [strongThreshold, setStrongThreshold] = useState(0.70);
 
-  // Initial load
+  // Initial load & search sync
   useEffect(() => {
     fetchCases();
     fetchStats();
+    fetchThresholds();
   }, [searchQuery, selectedReason, selectedDecision]);
+
+  const fetchThresholds = async () => {
+    try {
+      const res = await fetch('/api/risk/ratio-status');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.base_weak_threshold) setWeakThreshold(data.base_weak_threshold);
+        if (data.base_strong_threshold) setStrongThreshold(data.base_strong_threshold);
+      }
+    } catch (err) {
+      console.error('Failed to load thresholds:', err);
+    }
+  };
 
   const fetchCases = async () => {
     try {
@@ -80,17 +97,12 @@ export default function App() {
       const res = await fetch(`/api/cases/${caseId}/analyze`, { method: 'POST' });
       if (res.ok) {
         await Promise.all([fetchCases(), fetchStats()]);
-        const updatedRes = await fetch(`/api/cases/${caseId}`);
-        if (updatedRes.ok) {
-          const updatedCase = await updatedRes.json();
-          setSelectedCase(updatedCase);
-        }
-      } else {
-        const err = await res.json();
-        alert(`Analysis failed: ${err.message}`);
+        const updatedCases = await (await fetch('/api/cases')).json();
+        const updated = updatedCases.find((c: DisputeCase) => c.case_id === caseId);
+        if (updated) setSelectedCase(updated);
       }
     } catch (err) {
-      console.error('Analysis error:', err);
+      console.error('Analyze case error:', err);
     } finally {
       setAnalyzingCaseId(null);
     }
@@ -102,17 +114,12 @@ export default function App() {
       const res = await fetch(`/api/cases/${caseId}/generate-response`, { method: 'POST' });
       if (res.ok) {
         await Promise.all([fetchCases(), fetchStats()]);
-        const updatedRes = await fetch(`/api/cases/${caseId}`);
-        if (updatedRes.ok) {
-          const updatedCase = await updatedRes.json();
-          setSelectedCase(updatedCase);
-        }
-      } else {
-        const err = await res.json();
-        alert(`Response drafting rejected: ${err.message}`);
+        const updatedCases = await (await fetch('/api/cases')).json();
+        const updated = updatedCases.find((c: DisputeCase) => c.case_id === caseId);
+        if (updated) setSelectedCase(updated);
       }
     } catch (err) {
-      console.error('Response drafting error:', err);
+      console.error('Generate response error:', err);
     } finally {
       setIsGeneratingResponse(false);
     }
@@ -160,54 +167,96 @@ export default function App() {
     }
   };
 
+  // Helper to trigger opening settings from module navigation
+  const handleSelectModule = (mod: ModuleType) => {
+    if (mod === 'settings') {
+      setIsSettingsOpen(true);
+    } else {
+      setActiveModule(mod);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-100/70 text-slate-900 font-sans antialiased flex flex-col">
-      {/* Header */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+    <div className="flex min-h-screen bg-slate-100/70 text-slate-900 font-sans antialiased">
+      {/* Sidebar Navigation */}
+      <Sidebar
+        activeModule={activeModule}
+        setActiveModule={handleSelectModule}
         onOpenNewCase={() => setIsNewCaseOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        weakThreshold={weakThreshold}
+        strongThreshold={strongThreshold}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'operations' ? (
-          <div>
-            {/* Operational Stats Bar */}
-            <StatsOverview stats={stats} />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Workspace Top Header */}
+        <Header
+          activeModule={activeModule}
+          onOpenNewCase={() => setIsNewCaseOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
 
-            {/* Main Dispute Cases Table */}
-            <DisputeTable
-              cases={cases}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedReason={selectedReason}
-              setSelectedReason={setSelectedReason}
-              selectedDecision={selectedDecision}
-              setSelectedDecision={setSelectedDecision}
-              onSelectCase={(c) => setSelectedCase(c)}
-              onAnalyzeCase={handleAnalyzeCase}
-              analyzingCaseId={analyzingCaseId}
-            />
+        {/* Main Workspace Body */}
+        <main className="flex-1 p-6 max-w-7xl w-full mx-auto">
+          {activeModule === 'operations' && (
+            <div className="space-y-6">
+              {/* Operational Stats Bar */}
+              <StatsOverview stats={stats} />
+
+              {/* Main Dispute Cases Table */}
+              <DisputeTable
+                cases={cases}
+                loading={loading}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedReason={selectedReason}
+                setSelectedReason={setSelectedReason}
+                selectedDecision={selectedDecision}
+                setSelectedDecision={setSelectedDecision}
+                onSelectCase={(c) => setSelectedCase(c)}
+                onAnalyzeCase={handleAnalyzeCase}
+                analyzingCaseId={analyzingCaseId}
+              />
+            </div>
+          )}
+
+          {activeModule === 'risk' && <RiskRatioView />}
+
+          {activeModule === 'model' && <ModelEvaluationView />}
+
+          {activeModule === 'audit' && <AuditLogsView />}
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-200 bg-white py-3.5 mt-auto">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <div className="flex items-center space-x-2">
+              <span className="font-semibold text-slate-700">AI Risk Manager</span>
+              <span>&bull;</span>
+              <span>Random Forest Classifier (v1.0)</span>
+              <span>&bull;</span>
+              <span>Three-Zone Policy ({weakThreshold.toFixed(2)} / {strongThreshold.toFixed(2)})</span>
+            </div>
+            <div>
+              <span>Gemini 3.8 Flash Evidence Grounding &bull; Acquirer & Issuer Defense System</span>
+            </div>
           </div>
-        ) : (
-          /* ML Model Evaluation Dashboard */
-          <ModelEvaluationView />
-        )}
-      </main>
+        </footer>
+      </div>
 
-      {/* Case Detail Dossier & Defense Modal */}
-      <CaseDetailModal
-        disputeCase={selectedCase}
-        onClose={() => setSelectedCase(null)}
-        onAnalyze={handleAnalyzeCase}
-        onGenerateResponse={handleGenerateResponse}
-        isAnalyzing={analyzingCaseId === selectedCase?.case_id}
-        isGeneratingResponse={isGeneratingResponse}
-      />
+      {/* Case Detail Modal */}
+      {selectedCase && (
+        <CaseDetailModal
+          caseData={selectedCase}
+          onClose={() => setSelectedCase(null)}
+          onGenerateResponse={handleGenerateResponse}
+          isGeneratingResponse={isGeneratingResponse}
+        />
+      )}
 
-      {/* Ingest New Case Modal */}
+      {/* New Case Creation Modal */}
       <NewCaseModal
         isOpen={isNewCaseOpen}
         onClose={() => setIsNewCaseOpen(false)}
@@ -223,22 +272,8 @@ export default function App() {
         currentStrong={strongThreshold}
         onSave={handleSaveThresholds}
       />
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-4 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold text-slate-700">Chargeback Evidence Responder</span>
-            <span>&bull;</span>
-            <span>ML Random Forest Classifier (v1.0)</span>
-            <span>&bull;</span>
-            <span>Three-Zone Threshold Policy (0.40 / 0.70)</span>
-          </div>
-          <div>
-            <span>Gemini 3.8 Flash Evidence Grounding &bull; Acquirer & Issuer Defense System</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
+
+export default App;
