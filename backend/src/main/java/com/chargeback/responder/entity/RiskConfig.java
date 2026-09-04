@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "risk_config")
+@Table(name = "risk_configs")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,11 +35,11 @@ public class RiskConfig {
 
     @Column(name = "base_strong_threshold", nullable = false)
     @Builder.Default
-    private Double baseStrongThreshold = 0.80; // Derived from test set 100% precision at p>=0.80
+    private Double baseStrongThreshold = 0.70;
 
     @Column(name = "base_weak_threshold", nullable = false)
     @Builder.Default
-    private Double baseWeakThreshold = 0.30;
+    private Double baseWeakThreshold = 0.40;
 
     @Column(name = "t_cap", nullable = false)
     @Builder.Default

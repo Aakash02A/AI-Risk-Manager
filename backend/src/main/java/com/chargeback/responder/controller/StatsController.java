@@ -75,8 +75,10 @@ public class StatsController {
 
     @PostMapping("/settings/thresholds")
     public ResponseEntity<Map<String, Object>> updateThresholds(@RequestBody Map<String, Object> payload) {
-        RiskConfig config = riskConfigRepository.findTopByOrderByIdDesc()
-                .orElseGet(() -> riskConfigRepository.save(new RiskConfig()));
+        RiskConfig config = riskConfigRepository.findById(1L)
+                .orElseGet(() -> riskConfigRepository.findTopByOrderByIdDesc()
+                        .orElseGet(() -> new RiskConfig()));
+        config.setId(1L);
 
         if (payload.containsKey("weak_threshold")) {
             config.setBaseWeakThreshold(Double.parseDouble(payload.get("weak_threshold").toString()));

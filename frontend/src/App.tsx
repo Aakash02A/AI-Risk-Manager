@@ -32,9 +32,15 @@ export function App() {
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
   const [isSubmittingNewCase, setIsSubmittingNewCase] = useState(false);
 
-  // Thresholds state
-  const [weakThreshold, setWeakThreshold] = useState(0.40);
-  const [strongThreshold, setStrongThreshold] = useState(0.70);
+  // Thresholds state (persisted via localStorage + MySQL DB sync)
+  const [weakThreshold, setWeakThreshold] = useState<number>(() => {
+    const saved = localStorage.getItem('weak_threshold');
+    return saved ? parseFloat(saved) : 0.40;
+  });
+  const [strongThreshold, setStrongThreshold] = useState<number>(() => {
+    const saved = localStorage.getItem('strong_threshold');
+    return saved ? parseFloat(saved) : 0.70;
+  });
 
   // Initial load & search sync
   useEffect(() => {
@@ -48,8 +54,14 @@ export function App() {
       const res = await fetch('/api/risk/ratio-status');
       if (res.ok) {
         const data = await res.json();
-        if (data.base_weak_threshold) setWeakThreshold(data.base_weak_threshold);
-        if (data.base_strong_threshold) setStrongThreshold(data.base_strong_threshold);
+        if (typeof data.base_weak_threshold === 'number') {
+          setWeakThreshold(data.base_weak_threshold);
+          localStorage.setItem('weak_threshold', data.base_weak_threshold.toString());
+        }
+        if (typeof data.base_strong_threshold === 'number') {
+          setStrongThreshold(data.base_strong_threshold);
+          localStorage.setItem('strong_threshold', data.base_strong_threshold.toString());
+        }
       }
     } catch (err) {
       console.error('Failed to load thresholds:', err);
@@ -160,6 +172,8 @@ export function App() {
       if (res.ok) {
         setWeakThreshold(weak);
         setStrongThreshold(strong);
+        localStorage.setItem('weak_threshold', weak.toString());
+        localStorage.setItem('strong_threshold', strong.toString());
         await Promise.all([fetchCases(), fetchStats()]);
       }
     } catch (err) {

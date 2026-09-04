@@ -24,11 +24,15 @@ public class RiskController {
 
     @GetMapping("/ratio-status")
     public ResponseEntity<Map<String, Object>> getRatioStatus() {
-        RiskConfig config = riskConfigRepository.findTopByOrderByIdDesc()
-            .orElseGet(() -> riskConfigRepository.save(new RiskConfig()));
+        RiskConfig config = riskConfigRepository.findById(1L)
+            .orElseGet(() -> riskConfigRepository.findTopByOrderByIdDesc()
+                .orElseGet(() -> riskConfigRepository.save(new RiskConfig())));
+        config.setId(1L);
 
-        DisputeRatioState ratioState = disputeRatioStateRepository.findTopByOrderByIdDesc()
-            .orElseGet(() -> disputeRatioStateRepository.save(new DisputeRatioState()));
+        DisputeRatioState ratioState = disputeRatioStateRepository.findById(1L)
+            .orElseGet(() -> disputeRatioStateRepository.findTopByOrderByIdDesc()
+                .orElseGet(() -> disputeRatioStateRepository.save(new DisputeRatioState())));
+        ratioState.setId(1L);
 
         double effThreshold = ratioDecisionEngine.calculateEffectiveThreshold(ratioState, config);
         double lossRatio = ratioState.getLossRatio();
