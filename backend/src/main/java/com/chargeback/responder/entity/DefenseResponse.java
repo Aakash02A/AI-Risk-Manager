@@ -15,6 +15,7 @@ public class DefenseResponse {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "defense_response_id")
     private Long id;
 
     @Column(name = "case_id", nullable = false, length = 64)

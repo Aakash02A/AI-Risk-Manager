@@ -5,6 +5,7 @@ import { Search, Filter, ShieldCheck, AlertCircle, RefreshCw, Sparkles, ChevronR
 
 interface DisputeTableProps {
   cases: DisputeCase[];
+  loading?: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedReason: string;
@@ -18,6 +19,7 @@ interface DisputeTableProps {
 
 export const DisputeTable: React.FC<DisputeTableProps> = ({
   cases,
+  loading,
   searchQuery,
   setSearchQuery,
   selectedReason,
@@ -233,10 +235,10 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
                           e.stopPropagation();
                           onAnalyzeCase(c.case_id);
                         }}
-                        disabled={isAnalyzing}
+                        disabled={analyzingCaseId === c.case_id}
                         className="inline-flex items-center space-x-1 px-2.5 py-1 rounded border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs transition-colors disabled:opacity-50"
                       >
-                        <Sparkles className={`w-3 h-3 text-indigo-500 ${isAnalyzing ? 'animate-spin' : ''}`} />
+                        <Sparkles className={`w-3 h-3 text-indigo-500 ${analyzingCaseId === c.case_id ? 'animate-spin' : ''}`} />
                         <span>{c.prediction ? 'Re-Analyze' : 'Analyze ML'}</span>
                       </button>
 

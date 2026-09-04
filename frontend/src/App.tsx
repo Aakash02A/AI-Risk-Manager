@@ -263,9 +263,11 @@ export function App() {
       {/* Case Detail Modal */}
       {selectedCase && (
         <CaseDetailModal
-          caseData={selectedCase}
+          disputeCase={selectedCase}
           onClose={() => setSelectedCase(null)}
+          onAnalyze={handleAnalyzeCase}
           onGenerateResponse={handleGenerateResponse}
+          isAnalyzing={analyzingCaseId === selectedCase.case_id}
           isGeneratingResponse={isGeneratingResponse}
         />
       )}

@@ -16,6 +16,7 @@ public class Prediction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "prediction_id")
     private Long id;
 
     @Column(name = "case_id", nullable = false, length = 64)

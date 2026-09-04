@@ -15,6 +15,7 @@ public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "audit_log_id")
     private Long id;
 
     @Column(name = "case_id", nullable = false, length = 64)

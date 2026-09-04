@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "dispute_ratio_state")
+@Table(name = "dispute_ratio_states")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,6 +15,7 @@ public class DisputeRatioState {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dispute_ratio_state_id")
     private Long id;
 
     @Column(name = "period_days", nullable = false)

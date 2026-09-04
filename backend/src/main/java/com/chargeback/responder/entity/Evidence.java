@@ -15,13 +15,14 @@ public class Evidence {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "evidence_id")
     private Long id;
 
     @Column(name = "case_id", unique = true, nullable = false, length = 64)
     private String caseId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dispute_id", referencedColumnName = "id")
+    @JoinColumn(name = "dispute_id", referencedColumnName = "dispute_id")
     private Dispute dispute;
 
     @Column(name = "order_exists", nullable = false)

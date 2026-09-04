@@ -15,6 +15,7 @@ public class RiskConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "risk_config_id")
     private Long id;
 
     @Column(name = "network_ceiling", nullable = false)

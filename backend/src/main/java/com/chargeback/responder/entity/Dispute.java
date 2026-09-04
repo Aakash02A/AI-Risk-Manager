@@ -16,6 +16,7 @@ public class Dispute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dispute_id")
     private Long id;
 
     @Column(name = "case_id", unique = true, nullable = false, length = 64)
