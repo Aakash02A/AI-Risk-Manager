@@ -27,7 +27,6 @@ export default function App() {
   // Action pending states
   const [analyzingCaseId, setAnalyzingCaseId] = useState<string | null>(null);
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const [isSubmittingNewCase, setIsSubmittingNewCase] = useState(false);
 
   // Thresholds state
@@ -119,23 +118,6 @@ export default function App() {
     }
   };
 
-  const handleResetDemo = async () => {
-    setIsResetting(true);
-    try {
-      const res = await fetch('/api/cases/reset-demo', { method: 'POST' });
-      if (res.ok) {
-        await Promise.all([fetchCases(), fetchStats()]);
-        if (selectedCase) {
-          setSelectedCase(null);
-        }
-      }
-    } catch (err) {
-      console.error('Reset demo error:', err);
-    } finally {
-      setIsResetting(false);
-    }
-  };
-
   const handleCreateCase = async (caseData: any) => {
     setIsSubmittingNewCase(true);
     try {
@@ -184,10 +166,8 @@ export default function App() {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onResetDemo={handleResetDemo}
         onOpenNewCase={() => setIsNewCaseOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        isResetting={isResetting}
       />
 
       {/* Main Container */}

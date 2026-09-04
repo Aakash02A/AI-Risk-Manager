@@ -1,22 +1,18 @@
 import React from 'react';
-import { ShieldCheck, Cpu, Sliders, RotateCcw, Plus, Activity } from 'lucide-react';
+import { ShieldCheck, Cpu, Sliders, Plus, Activity } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: 'operations' | 'model';
   setActiveTab: (tab: 'operations' | 'model') => void;
-  onResetDemo: () => void;
   onOpenNewCase: () => void;
   onOpenSettings: () => void;
-  isResetting: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
-  onResetDemo,
   onOpenNewCase,
   onOpenSettings,
-  isResetting,
 }) => {
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-30">
@@ -73,17 +69,6 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2">
-            <button
-              id="btn-reset-demo"
-              onClick={onResetDemo}
-              disabled={isResetting}
-              title="Restore standard canonical cases (Case A, Case B, Case C)"
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-slate-300 rounded-md text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors disabled:opacity-50"
-            >
-              <RotateCcw className={`w-3.5 h-3.5 text-slate-500 ${isResetting ? 'animate-spin' : ''}`} />
-              <span>Reset Canonical Demo</span>
-            </button>
-
             <button
               id="btn-threshold-settings"
               onClick={onOpenSettings}

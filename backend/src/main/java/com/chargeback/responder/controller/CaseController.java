@@ -55,14 +55,5 @@ public class CaseController {
         com.chargeback.responder.dto.DefenseResponseDto response = caseService.generateDefenseResponse(caseId);
         return ResponseEntity.ok(response);
     }
-
-    @PostMapping("/reset-demo")
-    public ResponseEntity<Map<String, Object>> resetDemo() {
-        List<CaseResponseDto> cases = caseService.resetDemo();
-        Map<String, Object> result = Map.of(
-                "message", "Demo cases reset to initial canonical state",
-                "cases", cases
-        );
-        return ResponseEntity.ok(result);
-    }
 }
+
