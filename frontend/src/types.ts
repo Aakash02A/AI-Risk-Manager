@@ -134,3 +134,6 @@ export interface SystemStats {
   money_defended_inr: number;
   total_disputed_inr: number;
 }
+
+export type DashboardStats = SystemStats;
+

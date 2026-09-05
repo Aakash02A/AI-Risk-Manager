@@ -42,11 +42,15 @@ export function App() {
     return saved ? parseFloat(saved) : 0.70;
   });
 
-  // Initial load & search sync
+  // Initial load: fetch once on mount
+  useEffect(() => {
+    fetchThresholds();
+    fetchStats();
+  }, []);
+
+  // Sync cases on filter / search changes
   useEffect(() => {
     fetchCases();
-    fetchStats();
-    fetchThresholds();
   }, [searchQuery, selectedReason, selectedDecision]);
 
   const fetchThresholds = async () => {
@@ -174,10 +178,25 @@ export function App() {
         setStrongThreshold(strong);
         localStorage.setItem('weak_threshold', weak.toString());
         localStorage.setItem('strong_threshold', strong.toString());
-        await Promise.all([fetchCases(), fetchStats()]);
+        await Promise.all([fetchCases(), fetchStats(), fetchThresholds()]);
       }
     } catch (err) {
       console.error('Save thresholds error:', err);
+    }
+  };
+
+  const handleDeleteCase = async (caseId: string) => {
+    try {
+      const res = await fetch(`/api/cases/${caseId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSelectedCase(null);
+        await Promise.all([fetchCases(), fetchStats(), fetchThresholds()]);
+      } else {
+        const err = await res.json();
+        alert(`Failed to delete case: ${err.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Delete case error:', err);
     }
   };
 
@@ -231,6 +250,7 @@ export function App() {
                 setSelectedDecision={setSelectedDecision}
                 onSelectCase={(c) => setSelectedCase(c)}
                 onAnalyzeCase={handleAnalyzeCase}
+                onDeleteCase={handleDeleteCase}
                 analyzingCaseId={analyzingCaseId}
               />
             </div>
@@ -267,6 +287,7 @@ export function App() {
           onClose={() => setSelectedCase(null)}
           onAnalyze={handleAnalyzeCase}
           onGenerateResponse={handleGenerateResponse}
+          onDelete={handleDeleteCase}
           isAnalyzing={analyzingCaseId === selectedCase.case_id}
           isGeneratingResponse={isGeneratingResponse}
         />

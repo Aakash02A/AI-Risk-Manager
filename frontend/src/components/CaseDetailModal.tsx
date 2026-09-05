@@ -16,6 +16,7 @@ import {
   User,
   Building,
   HelpCircle,
+  Trash2,
 } from 'lucide-react';
 
 interface CaseDetailModalProps {
@@ -23,6 +24,7 @@ interface CaseDetailModalProps {
   onClose: () => void;
   onAnalyze: (caseId: string) => void;
   onGenerateResponse: (caseId: string) => void;
+  onDelete?: (caseId: string) => void;
   isAnalyzing: boolean;
   isGeneratingResponse: boolean;
 }
@@ -32,10 +34,19 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
   onClose,
   onAnalyze,
   onGenerateResponse,
+  onDelete,
   isAnalyzing,
   isGeneratingResponse,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Reset confirmation state whenever selected case changes
+  React.useEffect(() => {
+    setConfirmDelete(false);
+    setIsDeleting(false);
+  }, [disputeCase?.case_id]);
 
   if (!disputeCase) return null;
 
@@ -435,7 +446,52 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-end space-x-3">
+        <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div>
+            {onDelete && (
+              <>
+                {confirmDelete ? (
+                  <div className="flex items-center space-x-2 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg animate-in fade-in">
+                    <span className="text-xs font-semibold text-rose-900">Permanently delete {c.case_id}?</span>
+                    <button
+                      type="button"
+                      id="btn-confirm-delete"
+                      onClick={async () => {
+                        setIsDeleting(true);
+                        try {
+                          await onDelete(c.case_id);
+                        } finally {
+                          setIsDeleting(false);
+                        }
+                      }}
+                      disabled={isDeleting}
+                      className="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(false)}
+                      className="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    id="btn-delete-case"
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-md border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-medium text-xs transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Delete Dispute Case</span>
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
           <button
             id="btn-close-footer"
             onClick={onClose}

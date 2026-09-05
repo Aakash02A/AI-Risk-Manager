@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface EvidenceRepository extends JpaRepository<Evidence, Long> {
     Optional<Evidence> findByCaseId(String caseId);
+    void deleteByCaseId(String caseId);
 }

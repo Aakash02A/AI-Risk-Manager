@@ -55,5 +55,11 @@ public class CaseController {
         com.chargeback.responder.dto.DefenseResponseDto response = caseService.generateDefenseResponse(caseId);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{caseId}")
+    public ResponseEntity<Map<String, Object>> deleteCase(@PathVariable String caseId) {
+        caseService.deleteCase(caseId);
+        return ResponseEntity.ok(Map.of("message", "Dispute case " + caseId + " deleted successfully", "case_id", caseId));
+    }
 }
 

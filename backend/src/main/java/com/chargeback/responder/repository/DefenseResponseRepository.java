@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface DefenseResponseRepository extends JpaRepository<DefenseResponse, Long> {
     Optional<DefenseResponse> findTopByCaseIdOrderByCreatedAtDesc(String caseId);
+    void deleteByCaseId(String caseId);
 }

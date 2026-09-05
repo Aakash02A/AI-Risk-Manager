@@ -74,8 +74,10 @@ public class RiskController {
 
     @PostMapping("/config")
     public ResponseEntity<Map<String, Object>> updateRiskConfig(@RequestBody Map<String, Object> payload) {
-        RiskConfig config = riskConfigRepository.findTopByOrderByIdDesc()
-            .orElseGet(RiskConfig::new);
+        RiskConfig config = riskConfigRepository.findById(1L)
+            .orElseGet(() -> riskConfigRepository.findTopByOrderByIdDesc()
+                .orElseGet(RiskConfig::new));
+        config.setId(1L);
 
         if (payload.containsKey("network_ceiling")) {
             config.setNetworkCeiling(Double.parseDouble(payload.get("network_ceiling").toString()));

@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface DisputeRepository extends JpaRepository<Dispute, Long> {
     Optional<Dispute> findByCaseId(String caseId);
+    void deleteByCaseId(String caseId);
 
     @Query("SELECT d FROM Dispute d WHERE " +
            "(:search IS NULL OR LOWER(d.caseId) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +

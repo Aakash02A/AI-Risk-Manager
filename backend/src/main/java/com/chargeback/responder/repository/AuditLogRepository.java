@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByCaseIdOrderByCreatedAtAsc(String caseId);
+    void deleteByCaseId(String caseId);
 }

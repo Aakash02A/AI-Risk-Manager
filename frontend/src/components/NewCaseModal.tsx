@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DisputeReason, DeliveryStatus, CustomerCommunication, RefundStatus } from '../types';
-import { X, Plus, Sparkles } from 'lucide-react';
+import { X, Plus, Sparkles, RotateCcw } from 'lucide-react';
 
 interface NewCaseModalProps {
   isOpen: boolean;
@@ -15,7 +15,9 @@ export const NewCaseModal: React.FC<NewCaseModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
-  const [caseId, setCaseId] = useState(`CB-${Math.floor(1030 + Math.random() * 900)}`);
+  const generateNewCaseId = () => `CB-${Math.floor(1030 + Math.random() * 8900)}-IN`;
+
+  const [caseId, setCaseId] = useState(generateNewCaseId());
   const [disputeAmount, setDisputeAmount] = useState('35000');
   const [disputeReason, setDisputeReason] = useState<DisputeReason>('item_not_received');
   const [daysSinceOrder, setDaysSinceOrder] = useState('12');
@@ -29,6 +31,29 @@ export const NewCaseModal: React.FC<NewCaseModalProps> = ({
   const [customerCommunication, setCustomerCommunication] = useState<CustomerCommunication>('acknowledged_receipt');
   const [refundStatus, setRefundStatus] = useState<RefundStatus>('no_refund');
   const [customerPriorDisputeCount, setCustomerPriorDisputeCount] = useState('0');
+
+  // Function to reset all fields cleanly
+  const resetForm = () => {
+    setCaseId(generateNewCaseId());
+    setDisputeAmount('35000');
+    setDisputeReason('item_not_received');
+    setDaysSinceOrder('12');
+    setOrderExists(true);
+    setInvoiceExists(true);
+    setPaymentConfirmed(true);
+    setDeliveryStatus('delivered_confirmed');
+    setTrackingNumberPresent(true);
+    setCustomerCommunication('acknowledged_receipt');
+    setRefundStatus('no_refund');
+    setCustomerPriorDisputeCount('0');
+  };
+
+  // Reset whenever the modal is opened afresh
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -225,22 +250,33 @@ export const NewCaseModal: React.FC<NewCaseModalProps> = ({
             </div>
           </div>
 
-          <div className="border-t border-slate-200 pt-4 flex items-center justify-end space-x-3">
+          <div className="border-t border-slate-200 pt-4 flex items-center justify-between">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 border border-slate-300 rounded-md text-xs font-medium text-slate-700 bg-white hover:bg-slate-50"
+              onClick={resetForm}
+              className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-slate-800 underline"
             >
-              Cancel
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Clear / Reset Form</span>
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-1.5 rounded-md text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 flex items-center space-x-1.5 shadow-xs"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? 'Ingesting...' : 'Ingest & Record Dispute'}</span>
-            </button>
+
+            <div className="flex items-center space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 border border-slate-300 rounded-md text-xs font-medium text-slate-700 bg-white hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-4 py-1.5 rounded-md text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 flex items-center space-x-1.5 shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{isSubmitting ? 'Ingesting...' : 'Ingest & Record Dispute'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

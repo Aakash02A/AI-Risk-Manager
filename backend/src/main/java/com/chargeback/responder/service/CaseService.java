@@ -71,6 +71,17 @@ public class CaseService {
     }
 
     @Transactional
+    public void deleteCase(String caseId) {
+        Dispute dispute = disputeRepository.findByCaseId(caseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Case not found: " + caseId));
+        defenseResponseRepository.deleteByCaseId(caseId);
+        predictionRepository.deleteByCaseId(caseId);
+        evidenceRepository.deleteByCaseId(caseId);
+        auditLogRepository.deleteByCaseId(caseId);
+        disputeRepository.delete(dispute);
+    }
+
+    @Transactional
     public PredictionDto analyzeCase(String caseId) {
         Dispute dispute = disputeRepository.findByCaseId(caseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Case not found: " + caseId));

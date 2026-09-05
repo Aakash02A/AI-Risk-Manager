@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sliders, X, Check, AlertTriangle } from 'lucide-react';
 import { formatPercent } from '../utils/formatters';
 
@@ -19,6 +19,14 @@ export const ThresholdSettingsModal: React.FC<ThresholdSettingsModalProps> = ({
 }) => {
   const [weak, setWeak] = useState(currentWeak);
   const [strong, setStrong] = useState(currentStrong);
+
+  // Sync internal slider values when modal opens or when thresholds update
+  useEffect(() => {
+    if (isOpen) {
+      setWeak(currentWeak);
+      setStrong(currentStrong);
+    }
+  }, [isOpen, currentWeak, currentStrong]);
 
   if (!isOpen) return null;
 

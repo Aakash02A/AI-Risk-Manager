@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface PredictionRepository extends JpaRepository<Prediction, Long> {
     Optional<Prediction> findTopByCaseIdOrderByCreatedAtDesc(String caseId);
     List<Prediction> findByDecision(String decision);
+    void deleteByCaseId(String caseId);
 }
