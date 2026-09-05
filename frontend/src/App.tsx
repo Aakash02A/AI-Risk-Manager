@@ -250,7 +250,6 @@ export function App() {
                 setSelectedDecision={setSelectedDecision}
                 onSelectCase={(c) => setSelectedCase(c)}
                 onAnalyzeCase={handleAnalyzeCase}
-                onDeleteCase={handleDeleteCase}
                 analyzingCaseId={analyzingCaseId}
               />
             </div>

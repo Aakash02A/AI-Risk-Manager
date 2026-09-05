@@ -1,7 +1,7 @@
 import React from 'react';
 import { DisputeCase, DisputeReason, Decision } from '../types';
 import { formatINR, formatPercent, formatReasonLabel, getDecisionBadgeColor } from '../utils/formatters';
-import { Search, Filter, ShieldCheck, AlertCircle, RefreshCw, Sparkles, ChevronRight, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
+import { Search, Filter, ShieldCheck, AlertCircle, RefreshCw, Sparkles, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
 
 interface DisputeTableProps {
   cases: DisputeCase[];
@@ -14,7 +14,6 @@ interface DisputeTableProps {
   setSelectedDecision: (decision: string) => void;
   onSelectCase: (c: DisputeCase) => void;
   onAnalyzeCase: (caseId: string) => void;
-  onDeleteCase?: (caseId: string) => void;
   analyzingCaseId: string | null;
 }
 
@@ -29,7 +28,6 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
   setSelectedDecision,
   onSelectCase,
   onAnalyzeCase,
-  onDeleteCase,
   analyzingCaseId,
 }) => {
   return (
@@ -255,20 +253,6 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
                         <span>Dossier</span>
                         <ChevronRight className="w-3 h-3" />
                       </button>
-
-                      {onDeleteCase && (
-                        <button
-                          id={`btn-table-delete-${c.case_id}`}
-                          title="Delete dispute case"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteCase(c.case_id);
-                          }}
-                          className="inline-flex items-center justify-center p-1 rounded border border-rose-200 text-rose-600 bg-rose-50/60 hover:bg-rose-100 hover:text-rose-700 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
                     </td>
                   </tr>
                 );
