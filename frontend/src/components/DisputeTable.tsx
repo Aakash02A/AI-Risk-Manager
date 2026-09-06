@@ -99,8 +99,9 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
               <th className="py-3 px-4">Age</th>
               <th className="py-3 px-4">Evidence Checklist</th>
               <th className="py-3 px-4">ML Win Probability & Routing</th>
-              <th className="py-3 px-4 text-right">Actions</th>
+              <th className="py-3 px-4 text-right whitespace-nowrap">Actions</th>
             </tr>
+
           </thead>
           <tbody className="divide-y divide-slate-200">
             {cases.length === 0 ? (
@@ -249,32 +250,35 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3 px-4 text-right space-x-2">
-                      <button
-                        id={`btn-analyze-${c.case_id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAnalyzeCase(c.case_id);
-                        }}
-                        disabled={analyzingCaseId === c.case_id}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs transition-colors disabled:opacity-50"
-                      >
-                        <Sparkles className={`w-3 h-3 text-indigo-500 ${analyzingCaseId === c.case_id ? 'animate-spin' : ''}`} />
-                        <span>{c.prediction ? 'Re-Analyze' : 'Analyze ML'}</span>
-                      </button>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end space-x-2">
+                        <button
+                          id={`btn-analyze-${c.case_id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAnalyzeCase(c.case_id);
+                          }}
+                          disabled={analyzingCaseId === c.case_id}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1 rounded border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs transition-colors disabled:opacity-50 shrink-0 shadow-2xs"
+                        >
+                          <Sparkles className={`w-3 h-3 text-indigo-500 ${analyzingCaseId === c.case_id ? 'animate-spin' : ''}`} />
+                          <span>{c.prediction ? 'Re-Analyze' : 'Analyze ML'}</span>
+                        </button>
 
-                      <button
-                        id={`btn-view-${c.case_id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectCase(c);
-                        }}
-                        className="inline-flex items-center space-x-0.5 px-2.5 py-1 rounded bg-slate-900 text-white hover:bg-slate-800 font-medium text-xs transition-colors"
-                      >
-                        <span>Dossier</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </button>
+                        <button
+                          id={`btn-view-${c.case_id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectCase(c);
+                          }}
+                          className="inline-flex items-center space-x-0.5 px-2.5 py-1 rounded bg-slate-900 text-white hover:bg-slate-800 font-medium text-xs transition-colors shrink-0 shadow-2xs"
+                        >
+                          <span>Dossier</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
                     </td>
+
                   </tr>
                 );
               })
