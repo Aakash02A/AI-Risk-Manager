@@ -144,60 +144,60 @@ INSERT INTO `dispute_ratio_states` (`dispute_ratio_state_id`, `period_days`, `di
 VALUES (1, 30, 1000, 9, 91, 100, 0.009);
 
 -- Disputes Records
-INSERT INTO `disputes` (`dispute_id`, `case_id`, `dispute_amount`, `dispute_reason`, `days_since_order`) VALUES
-(1, 'CB-8942-IN', 145000.00, 'fraudulent_transaction', 3),
-(2, 'CB-7819-IN', 54200.00, 'item_not_received', 7),
-(3, 'CB-6120-IN', 18900.00, 'not_as_described', 14),
-(4, 'CB-5431-IN', 89500.00, 'canceled_recurring_billing', 21),
-(5, 'CB-4310-IN', 12800.00, 'credit_not_processed', 10),
-(6, 'CB-3291-IN', 9450.00, 'item_not_received', 28),
-(7, 'CB-2104-IN', 210000.00, 'fraudulent_transaction', 2),
-(8, 'CB-1982-IN', 32000.00, 'not_as_described', 6),
-(9, 'CB-1540-IN', 14999.00, 'fraudulent_transaction', 25),
-(10, 'CB-1205-IN', 78000.00, 'canceled_recurring_billing', 15),
-(11, 'CB-1102-IN', 45500.00, 'not_as_described', 11),
-(12, 'CB-1050-IN', 22400.00, 'credit_not_processed', 19);
+INSERT INTO `disputes` (`dispute_id`, `case_id`, `dispute_amount`, `dispute_reason`, `days_since_order`, `created_at`, `updated_at`) VALUES
+(1, 'CB-8942-IN', 145000.00, 'fraudulent_transaction', 3, NOW() - INTERVAL 4 MINUTE, NOW() - INTERVAL 4 MINUTE),
+(2, 'CB-7819-IN', 54200.00, 'item_not_received', 7, NOW() - INTERVAL 12 MINUTE, NOW() - INTERVAL 12 MINUTE),
+(3, 'CB-6120-IN', 18900.00, 'not_as_described', 14, NOW() - INTERVAL 25 MINUTE, NOW() - INTERVAL 20 MINUTE),
+(4, 'CB-5431-IN', 89500.00, 'canceled_recurring_billing', 21, NOW() - INTERVAL 42 MINUTE, NOW() - INTERVAL 35 MINUTE),
+(5, 'CB-4310-IN', 12800.00, 'credit_not_processed', 10, NOW() - INTERVAL 1 HOUR, NOW() - INTERVAL 1 HOUR),
+(6, 'CB-3291-IN', 9450.00, 'item_not_received', 28, NOW() - INTERVAL 2 HOUR, NOW() - INTERVAL 2 HOUR),
+(7, 'CB-2104-IN', 210000.00, 'fraudulent_transaction', 2, NOW() - INTERVAL 3 HOUR, NOW() - INTERVAL 3 HOUR),
+(8, 'CB-1982-IN', 32000.00, 'not_as_described', 6, NOW() - INTERVAL 5 HOUR, NOW() - INTERVAL 5 HOUR),
+(9, 'CB-1540-IN', 14999.00, 'fraudulent_transaction', 25, NOW() - INTERVAL 8 HOUR, NOW() - INTERVAL 8 HOUR),
+(10, 'CB-1205-IN', 78000.00, 'canceled_recurring_billing', 15, NOW() - INTERVAL 12 HOUR, NOW() - INTERVAL 12 HOUR),
+(11, 'CB-1102-IN', 45500.00, 'not_as_described', 11, NOW() - INTERVAL 14 HOUR, NOW() - INTERVAL 14 HOUR),
+(12, 'CB-1050-IN', 22400.00, 'credit_not_processed', 19, NOW() - INTERVAL 16 HOUR, NOW() - INTERVAL 16 HOUR);
 
 -- Evidence Records
-INSERT INTO `evidence` (`case_id`, `dispute_id`, `order_exists`, `invoice_exists`, `payment_confirmed`, `delivery_status`, `tracking_number_present`, `customer_communication`, `refund_status`, `customer_prior_dispute_count`) VALUES
-('CB-8942-IN', 1, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-7819-IN', 2, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-6120-IN', 3, TRUE, TRUE, TRUE, 'delivered_unconfirmed', TRUE, 'complained_before', 'no_refund', 1),
-('CB-5431-IN', 4, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-4310-IN', 5, TRUE, TRUE, TRUE, 'delivered_unconfirmed', TRUE, 'complained_before', 'refund_pending', 1),
-('CB-3291-IN', 6, TRUE, TRUE, TRUE, 'unknown', FALSE, 'no_contact', 'no_refund', 3),
-('CB-2104-IN', 7, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-1982-IN', 8, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-1540-IN', 9, TRUE, FALSE, FALSE, 'unknown', FALSE, 'no_contact', 'no_refund', 4),
-('CB-1205-IN', 10, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-1102-IN', 11, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0),
-('CB-1050-IN', 12, TRUE, TRUE, TRUE, 'delivered_unconfirmed', TRUE, 'complained_before', 'refund_pending', 1);
+INSERT INTO `evidence` (`case_id`, `dispute_id`, `order_exists`, `invoice_exists`, `payment_confirmed`, `delivery_status`, `tracking_number_present`, `customer_communication`, `refund_status`, `customer_prior_dispute_count`, `created_at`) VALUES
+('CB-8942-IN', 1, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 4 MINUTE),
+('CB-7819-IN', 2, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 12 MINUTE),
+('CB-6120-IN', 3, TRUE, TRUE, TRUE, 'delivered_unconfirmed', TRUE, 'complained_before', 'no_refund', 1, NOW() - INTERVAL 25 MINUTE),
+('CB-5431-IN', 4, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 42 MINUTE),
+('CB-4310-IN', 5, TRUE, TRUE, TRUE, 'delivered_unconfirmed', TRUE, 'complained_before', 'refund_pending', 1, NOW() - INTERVAL 1 HOUR),
+('CB-3291-IN', 6, TRUE, TRUE, TRUE, 'unknown', FALSE, 'no_contact', 'no_refund', 3, NOW() - INTERVAL 2 HOUR),
+('CB-2104-IN', 7, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 3 HOUR),
+('CB-1982-IN', 8, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 5 HOUR),
+('CB-1540-IN', 9, TRUE, FALSE, FALSE, 'unknown', FALSE, 'no_contact', 'no_refund', 4, NOW() - INTERVAL 8 HOUR),
+('CB-1205-IN', 10, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 12 HOUR),
+('CB-1102-IN', 11, TRUE, TRUE, TRUE, 'delivered_confirmed', TRUE, 'acknowledged_receipt', 'no_refund', 0, NOW() - INTERVAL 14 HOUR),
+('CB-1050-IN', 12, TRUE, TRUE, TRUE, 'delivered_unconfirmed', TRUE, 'complained_before', 'refund_pending', 1, NOW() - INTERVAL 16 HOUR);
 
 -- Predictions Records
-INSERT INTO `predictions` (`case_id`, `win_probability`, `decision`, `model_name`, `model_version`) VALUES
-('CB-8942-IN', 0.9600, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-7819-IN', 0.9400, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-6120-IN', 0.5800, 'BORDERLINE', 'RandomForestClassifier', '1.0'),
-('CB-5431-IN', 0.8500, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-4310-IN', 0.4600, 'BORDERLINE', 'RandomForestClassifier', '1.0'),
-('CB-3291-IN', 0.1400, 'WEAK', 'RandomForestClassifier', '1.0'),
-('CB-2104-IN', 0.9800, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-1982-IN', 0.8900, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-1540-IN', 0.2200, 'WEAK', 'RandomForestClassifier', '1.0'),
-('CB-1205-IN', 0.8100, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-1102-IN', 0.8700, 'STRONG', 'RandomForestClassifier', '1.0'),
-('CB-1050-IN', 0.5200, 'BORDERLINE', 'RandomForestClassifier', '1.0');
+INSERT INTO `predictions` (`case_id`, `win_probability`, `decision`, `model_name`, `model_version`, `created_at`) VALUES
+('CB-8942-IN', 0.9600, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 4 MINUTE),
+('CB-7819-IN', 0.9400, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 12 MINUTE),
+('CB-6120-IN', 0.5800, 'BORDERLINE', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 20 MINUTE),
+('CB-5431-IN', 0.8500, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 35 MINUTE),
+('CB-4310-IN', 0.4600, 'BORDERLINE', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 1 HOUR),
+('CB-3291-IN', 0.1400, 'WEAK', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 2 HOUR),
+('CB-2104-IN', 0.9800, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 3 HOUR),
+('CB-1982-IN', 0.8900, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 5 HOUR),
+('CB-1540-IN', 0.2200, 'WEAK', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 8 HOUR),
+('CB-1205-IN', 0.8100, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 12 HOUR),
+('CB-1102-IN', 0.8700, 'STRONG', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 14 HOUR),
+('CB-1050-IN', 0.5200, 'BORDERLINE', 'RandomForestClassifier', '1.0', NOW() - INTERVAL 16 HOUR);
 
 -- Audit Logs Records
-INSERT INTO `audit_logs` (`case_id`, `action`, `details`, `actor`) VALUES
-('CB-8942-IN', 'Case Received', 'High-value chargeback notice received from Visa Acquirer (Ref: TXN-8942-0192)', 'OPERATOR'),
-('CB-8942-IN', '3DS Verification', '3D-Secure 2.0 authentication liability shift verified with HDFC acquiring bank payload', 'SYSTEM'),
-('CB-8942-IN', 'ML Analysis', 'Predicted win confidence: 96% -> STRONG Zone (Auto-Respond Authorized)', 'ML_CLASSIFIER'),
-('CB-7819-IN', 'Case Received', 'Item Not Received dispute initiated by cardholder (Order #ORD-IN-2026-7819)', 'OPERATOR'),
-('CB-7819-IN', 'Courier Audit', 'FedEx Express tracking (FX-78192019-IN) verified with signed proof of delivery photo', 'SYSTEM'),
-('CB-6120-IN', 'Case Received', 'Merchandise quality dispute filed via Mastercard gateway', 'OPERATOR'),
-('CB-6120-IN', 'Interaction Logged', 'Customer email thread attached showing merchant offered 15% discount credit', 'SYSTEM'),
-('CB-6120-IN', 'ML Analysis', 'Predicted win confidence: 58% -> BORDERLINE Zone (Human Review Required)', 'ML_CLASSIFIER'),
-('CB-5431-IN', 'Case Received', 'Subscription renewal charge dispute filed by cardholder', 'OPERATOR'),
-('CB-5431-IN', 'Contract Audit', 'Annual SaaS contract digital agreement timestamp & IP match verified', 'SYSTEM'),
-('CB-5431-IN', 'ML Analysis', 'Predicted win confidence: 85% -> STRONG Zone', 'ML_CLASSIFIER');
+INSERT INTO `audit_logs` (`case_id`, `action`, `details`, `actor`, `created_at`) VALUES
+('CB-8942-IN', 'Case Received', 'High-value chargeback notice received from Visa Acquirer (Ref: TXN-8942-0192)', 'OPERATOR', NOW() - INTERVAL 4 MINUTE),
+('CB-8942-IN', '3DS Verification', '3D-Secure 2.0 authentication liability shift verified with HDFC acquiring bank payload', 'SYSTEM', NOW() - INTERVAL 3 MINUTE),
+('CB-8942-IN', 'ML Analysis', 'Predicted win confidence: 96% -> STRONG Zone (Auto-Respond Authorized)', 'ML_CLASSIFIER', NOW() - INTERVAL 2 MINUTE),
+('CB-7819-IN', 'Case Received', 'Item Not Received dispute initiated by cardholder (Order #ORD-IN-2026-7819)', 'OPERATOR', NOW() - INTERVAL 12 MINUTE),
+('CB-7819-IN', 'Courier Audit', 'FedEx Express tracking (FX-78192019-IN) verified with signed proof of delivery photo', 'SYSTEM', NOW() - INTERVAL 11 MINUTE),
+('CB-6120-IN', 'Case Received', 'Merchandise quality dispute filed via Mastercard gateway', 'OPERATOR', NOW() - INTERVAL 25 MINUTE),
+('CB-6120-IN', 'Interaction Logged', 'Customer email thread attached showing merchant offered 15% discount credit', 'SYSTEM', NOW() - INTERVAL 22 MINUTE),
+('CB-6120-IN', 'ML Analysis', 'Predicted win confidence: 58% -> BORDERLINE Zone (Human Review Required)', 'ML_CLASSIFIER', NOW() - INTERVAL 20 MINUTE),
+('CB-5431-IN', 'Case Received', 'Subscription renewal charge dispute filed by cardholder', 'OPERATOR', NOW() - INTERVAL 42 MINUTE),
+('CB-5431-IN', 'Contract Audit', 'Annual SaaS contract digital agreement timestamp & IP match verified', 'SYSTEM', NOW() - INTERVAL 38 MINUTE),
+('CB-5431-IN', 'ML Analysis', 'Predicted win confidence: 85% -> STRONG Zone', 'ML_CLASSIFIER', NOW() - INTERVAL 35 MINUTE);

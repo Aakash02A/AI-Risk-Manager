@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DisputeCase } from '../types';
-import { formatINR, formatPercent, formatReasonLabel, getDecisionBadgeColor } from '../utils/formatters';
+import { formatINR, formatPercent, formatReasonLabel, getDecisionBadgeColor, formatRealtimeTimestamp, formatTimeOnly, formatRelativeTime } from '../utils/formatters';
 import {
   X,
   ShieldCheck,
@@ -17,6 +17,9 @@ import {
   Building,
   HelpCircle,
   Trash2,
+  CreditCard,
+  Send,
+  Zap,
 } from 'lucide-react';
 
 interface CaseDetailModalProps {
@@ -25,6 +28,7 @@ interface CaseDetailModalProps {
   onAnalyze: (caseId: string) => void;
   onGenerateResponse: (caseId: string) => void;
   onDelete?: (caseId: string) => void;
+  onRefresh?: () => void;
   isAnalyzing: boolean;
   isGeneratingResponse: boolean;
 }
@@ -35,12 +39,16 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
   onAnalyze,
   onGenerateResponse,
   onDelete,
+  onRefresh,
   isAnalyzing,
   isGeneratingResponse,
 }) => {
   const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubmittingRazorpay, setIsSubmittingRazorpay] = useState(false);
+  const [isAcceptingRazorpay, setIsAcceptingRazorpay] = useState(false);
+  const [razorpayFeedback, setRazorpayFeedback] = useState<string | null>(null);
 
   // Reset confirmation state whenever selected case changes
   React.useEffect(() => {
@@ -64,6 +72,39 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
     }
   };
 
+  const handleContestRazorpay = async () => {
+    setIsSubmittingRazorpay(true);
+    setRazorpayFeedback(null);
+    try {
+      const res = await fetch(`/api/cases/${c.case_id}/razorpay/contest`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to submit contest to Razorpay');
+      setRazorpayFeedback('Rebuttal packet successfully submitted to Razorpay Dispute Portal!');
+      if (onRefresh) onRefresh();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSubmittingRazorpay(false);
+    }
+  };
+
+  const handleAcceptRazorpay = async () => {
+    if (!confirm('Are you sure you want to concede this dispute on Razorpay? A full refund will be authorized to prevent scheme arbitration fees.')) {
+      return;
+    }
+    setIsAcceptingRazorpay(true);
+    setRazorpayFeedback(null);
+    try {
+      const res = await fetch(`/api/cases/${c.case_id}/razorpay/accept`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to concede dispute on Razorpay');
+      setRazorpayFeedback('Dispute successfully conceded and refunded via Razorpay.');
+      if (onRefresh) onRefresh();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsAcceptingRazorpay(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
@@ -81,7 +122,7 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Disputed: <span className="font-semibold text-slate-900">{formatINR(c.dispute_amount)}</span> &bull; {c.days_since_order} days since order &bull; Logged: {new Date(c.created_at).toLocaleDateString()}
+                Disputed: <span className="font-semibold text-slate-900">{formatINR(c.dispute_amount)}</span> &bull; {c.days_since_order} days since order &bull; Logged: <span className="font-medium text-slate-700">{new Date(c.created_at).toLocaleDateString()}</span>
               </p>
             </div>
           </div>
@@ -109,6 +150,69 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
 
         {/* Modal Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Section 0: Razorpay Transaction & Card Scheme Overview */}
+          <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-slate-900 text-white rounded-xl p-4 border border-blue-900/50 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-bold text-blue-300">Razorpay Payment Transaction</span>
+                    {c.card_network && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30 font-bold">
+                        {c.card_network}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400">
+                    Payment ID: <strong className="text-white">{c.payment_id || 'pay_rzp_live'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 text-xs">
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Dispute ID</span>
+                  <span className="font-mono text-sky-300 font-bold">{c.razorpay_dispute_id || 'disp_rzp_live'}</span>
+                </div>
+                <div className="h-6 w-px bg-slate-800"></div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Gateway Status</span>
+                  <span className={`font-semibold px-2 py-0.5 rounded text-[10px] ${
+                    c.razorpay_status === 'submitted'
+                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                      : c.razorpay_status === 'accepted'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  }`}>
+                    {c.razorpay_status === 'submitted' ? 'Contest Submitted' : c.razorpay_status === 'accepted' ? 'Conceded & Refunded' : 'Action Required'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 text-xs font-mono text-slate-300">
+              <div>
+                <span className="text-slate-400 text-[10px] block">DISPUTED AMOUNT</span>
+                <span className="text-emerald-400 font-bold text-sm">{formatINR(c.dispute_amount)}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">CARD NETWORK</span>
+                <span className="font-bold text-white">{c.card_network || 'VISA'}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">PAYMENT CAPTURE</span>
+                <span className="text-slate-200">{c.evidence.payment_confirmed ? '3DS Verified' : 'Standard'}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">DISPUTE DEADLINE</span>
+                <span className="text-amber-400 font-semibold">{c.expires_at ? new Date(c.expires_at).toLocaleDateString() : '7 Days Remaining'}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Section 1: ML Routing & Decision Panel */}
           <div className="border border-slate-200 rounded-lg p-5 bg-slate-50/50">
             <div className="flex items-center justify-between mb-4">
@@ -382,7 +486,9 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
             {def?.response_text ? (
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-100 pb-2">
-                  <span className="font-mono">Generated by: {def.generated_by} &bull; {new Date(def.created_at).toLocaleString()}</span>
+                  <span className="font-mono">
+                    Generated by: <strong className="text-slate-700">{def.generated_by}</strong> &bull; {formatRealtimeTimestamp(def.created_at)}
+                  </span>
                   <button
                     id="btn-copy-defense"
                     onClick={handleCopy}
@@ -411,6 +517,56 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                 <p className="text-xs text-slate-600">Case classified as STRONG. Click "Draft Formal Defense" to generate the 8-part rebuttal package.</p>
               </div>
             ) : null}
+
+            {/* Razorpay Action Bar */}
+            <div className="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs text-slate-500">
+                {razorpayFeedback ? (
+                  <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{razorpayFeedback}</span>
+                  </span>
+                ) : c.razorpay_status === 'submitted' ? (
+                  <span className="text-blue-700 font-semibold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Rebuttal packet and evidence uploaded to Razorpay API for card scheme review.</span>
+                  </span>
+                ) : c.razorpay_status === 'accepted' ? (
+                  <span className="text-purple-700 font-semibold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Dispute conceded. Refund authorized to protect merchant loss ratio.</span>
+                  </span>
+                ) : (
+                  <span>Submit evidence before the scheme deadline or concede to avoid arbitration penalties.</span>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {pred?.decision === 'STRONG' && def?.response_text && c.razorpay_status !== 'submitted' && (
+                  <button
+                    id="btn-contest-razorpay"
+                    onClick={handleContestRazorpay}
+                    disabled={isSubmittingRazorpay}
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold text-xs shadow-xs disabled:opacity-50"
+                  >
+                    <Send className={`w-3.5 h-3.5 ${isSubmittingRazorpay ? 'animate-spin' : ''}`} />
+                    <span>{isSubmittingRazorpay ? 'Submitting...' : 'Submit Contest to Razorpay'}</span>
+                  </button>
+                )}
+
+                {pred?.decision === 'WEAK' && c.razorpay_status !== 'accepted' && (
+                  <button
+                    id="btn-accept-razorpay"
+                    onClick={handleAcceptRazorpay}
+                    disabled={isAcceptingRazorpay}
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs disabled:opacity-50"
+                  >
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${isAcceptingRazorpay ? 'animate-spin' : ''}`} />
+                    <span>{isAcceptingRazorpay ? 'Conceding...' : 'Accept & Refund via Razorpay'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Section 4: Chronological Audit Trail (Section 27) */}
@@ -435,8 +591,8 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                       </div>
                       <p className="text-slate-600">{log.details}</p>
                     </div>
-                    <span className="text-[11px] font-mono text-slate-400 shrink-0">
-                      {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    <span className="text-[11px] font-mono text-slate-500 shrink-0 font-medium">
+                      {formatTimeOnly(log.created_at)}
                     </span>
                   </div>
                 ))

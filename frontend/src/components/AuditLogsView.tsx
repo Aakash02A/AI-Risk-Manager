@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, Filter, ShieldCheck, User, Cpu, RefreshCw, Clock } from 'lucide-react';
+import { FileText, Search, Filter, ShieldCheck, User, Cpu, RefreshCw, Clock, Sparkles } from 'lucide-react';
 import { DisputeCase } from '../types';
+import { formatRealtimeTimestamp, formatTimeOnly } from '../utils/formatters';
 
 export const AuditLogsView: React.FC = () => {
   const [cases, setCases] = useState<DisputeCase[]>([]);
@@ -18,7 +19,7 @@ export const AuditLogsView: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to fetch cases for audit logs:', err);
-    } fontally: {
+    } finally {
       setLoading(false);
     }
   };
@@ -32,7 +33,6 @@ export const AuditLogsView: React.FC = () => {
     (c.audit_logs || []).map((log) => ({
       ...log,
       case_id: c.case_id,
-      merchant_id: c.merchant_id,
       dispute_amount: c.dispute_amount,
     }))
   ).sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
@@ -43,7 +43,7 @@ export const AuditLogsView: React.FC = () => {
       log.case_id.toLowerCase().includes(filterQuery.toLowerCase()) ||
       log.action.toLowerCase().includes(filterQuery.toLowerCase()) ||
       log.details.toLowerCase().includes(filterQuery.toLowerCase());
-    const matchesActor = selectedActor === 'ALL' || log.performed_by === selectedActor;
+    const matchesActor = selectedActor === 'ALL' || log.actor === selectedActor;
     return matchesQuery && matchesActor;
   });
 
@@ -61,6 +61,13 @@ export const AuditLogsView: React.FC = () => {
           <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
             <User className="w-3 h-3 mr-1 text-blue-600" />
             OPERATOR
+          </span>
+        );
+      case 'LLM_ASSISTANT':
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <Sparkles className="w-3 h-3 mr-1 text-emerald-600" />
+            LLM_ASSISTANT
           </span>
         );
       case 'SYSTEM':
@@ -119,7 +126,7 @@ export const AuditLogsView: React.FC = () => {
             <Filter className="w-3.5 h-3.5 mr-1" />
             Actor:
           </span>
-          {['ALL', 'SYSTEM', 'ML_CLASSIFIER', 'OPERATOR'].map((actor) => (
+          {['ALL', 'SYSTEM', 'ML_CLASSIFIER', 'LLM_ASSISTANT', 'OPERATOR'].map((actor) => (
             <button
               key={actor}
               onClick={() => setSelectedActor(actor)}
@@ -165,9 +172,12 @@ export const AuditLogsView: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-3 self-end sm:self-auto shrink-0">
-                  {getActorBadge(log.performed_by)}
-                  <span className="text-[11px] font-mono text-slate-400">
-                    {log.created_at ? new Date(log.created_at).toLocaleTimeString() : 'Just now'}
+                  {getActorBadge(log.actor)}
+                  <span
+                    className="text-[11px] font-mono text-slate-500 font-semibold"
+                    title={log.created_at ? formatRealtimeTimestamp(log.created_at) : 'Recorded live'}
+                  >
+                    {log.created_at ? formatTimeOnly(log.created_at) : 'Live'}
                   </span>
                 </div>
               </div>

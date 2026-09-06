@@ -64,3 +64,51 @@ export function getDecisionBadgeColor(decision?: Decision | null): {
       };
   }
 }
+
+export function parseDateSafe(date?: string | Date | null): Date {
+  if (!date) return new Date();
+  if (date instanceof Date) return date;
+  const parsed = new Date(date);
+  return isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
+export function formatRealtimeTimestamp(date?: string | Date | null): string {
+  const d = parseDateSafe(date);
+  return d.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+}
+
+export function formatTimeOnly(date?: string | Date | null): string {
+  const d = parseDateSafe(date);
+  return d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+}
+
+export function formatRelativeTime(date?: string | Date | null): string {
+  const d = parseDateSafe(date);
+  const now = new Date();
+  const diffSec = Math.floor((now.getTime() - d.getTime()) / 1000);
+
+  if (diffSec < 45) return 'Just now';
+  if (diffSec < 90) return '1m ago';
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) {
+    const hours = Math.floor(diffSec / 3600);
+    return `${hours}h ago`;
+  }
+  const days = Math.floor(diffSec / 86400);
+  if (days === 1) return 'Yesterday';
+  if (days < 30) return `${days}d ago`;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}

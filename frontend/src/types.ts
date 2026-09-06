@@ -58,6 +58,11 @@ export interface AuditLogData {
 export interface DisputeCase {
   id?: number;
   case_id: string;
+  payment_id?: string;
+  razorpay_dispute_id?: string;
+  razorpay_status?: 'action_required' | 'under_review' | 'submitted' | 'won' | 'lost' | 'accepted';
+  card_network?: 'VISA' | 'MASTERCARD' | 'RUPAY';
+  expires_at?: string;
   dispute_amount: number;
   dispute_reason: DisputeReason;
   days_since_order: number;
@@ -68,6 +73,7 @@ export interface DisputeCase {
   defense_response?: DefenseResponseData | null;
   audit_logs: AuditLogData[];
 }
+
 
 export interface ModelMetricsData {
   model_name: string;

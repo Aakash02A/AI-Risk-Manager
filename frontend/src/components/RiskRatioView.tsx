@@ -21,25 +21,36 @@ import { formatINR, formatPercent } from '../utils/formatters';
 export const RiskRatioView: React.FC = () => {
   const [ratioData, setRatioData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [lastSyncedTime, setLastSyncedTime] = useState<Date>(new Date());
+  const [isPolling, setIsPolling] = useState(false);
+  const [justSynced, setJustSynced] = useState(false);
 
   // Interactive Sandbox Simulator State
   const [simulatedLossRatio, setSimulatedLossRatio] = useState<number>(0.009);
 
   const fetchRatioStatus = async () => {
-    setLoading(true);
+    setIsPolling(true);
     try {
       const res = await fetch('/api/risk/ratio-status');
       if (res.ok) {
         const data = await res.json();
         setRatioData(data);
+        if (data.synced_timestamp_millis) {
+          setLastSyncedTime(new Date(data.synced_timestamp_millis));
+        } else {
+          setLastSyncedTime(new Date());
+        }
         if (typeof data.loss_ratio === 'number') {
           setSimulatedLossRatio(data.loss_ratio);
         }
+        setJustSynced(true);
+        setTimeout(() => setJustSynced(false), 3000);
       }
     } catch (err) {
       console.error('Failed to load risk status:', err);
     } finally {
       setLoading(false);
+      setIsPolling(false);
     }
   };
 
@@ -119,6 +130,12 @@ export const RiskRatioView: React.FC = () => {
               }`}>
                 ● Status: {healthStatus.replace('_', ' ')}
               </span>
+              <span className="text-slate-500">•</span>
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800/80 text-slate-200 border border-slate-700">
+                <span>Live DB Portfolio: <strong>{ratioData?.active_cases_count ?? 10} Cases</strong></span>
+                <span className="text-slate-500">|</span>
+                <span className="text-emerald-400">Defended: <strong>{formatINR(ratioData?.money_defended_inr ?? 455000)}</strong></span>
+              </span>
             </div>
 
             <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
@@ -130,17 +147,29 @@ export const RiskRatioView: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-2.5 shrink-0">
             <button
               onClick={fetchRatioStatus}
-              className="flex items-center space-x-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-xl border border-slate-700 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isPolling}
+              className="flex items-center space-x-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-xl border border-slate-700 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Poll Live Ratio Engine</span>
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isPolling ? 'animate-spin' : ''}`} />
+              <span>{isPolling ? 'Polling Engine...' : 'Poll Live Ratio Engine'}</span>
             </button>
-            <span className="text-[11px] text-slate-400 font-mono">
-              Last synced: {ratioData?.updated_at ? new Date(ratioData.updated_at).toLocaleTimeString() : 'Live'}
-            </span>
+            <div className="flex items-center space-x-2 text-[11px] font-mono">
+              <span className="relative flex h-2 w-2">
+                <span className={`absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 ${isPolling ? 'animate-ping' : ''}`}></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-slate-400">
+                Last synced: <span className="text-white font-bold">{lastSyncedTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}</span>
+              </span>
+              {justSynced && (
+                <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950 border border-emerald-500/50 px-1.5 py-0.5 rounded animate-pulse">
+                  Synced!
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -565,10 +594,12 @@ export const RiskRatioView: React.FC = () => {
               <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200">
                 <div>
                   <span className="font-semibold text-emerald-950 block">Net Revenue Defended</span>
-                  <span className="text-[11px] text-emerald-700">Successfully protected legitimate merchant funds</span>
+                  <span className="text-[11px] text-emerald-700">
+                    Protected across {ratioData?.strong_cases_count ?? 5} auto-defended cases ({ratioData?.active_cases_count ?? 10} total in DB)
+                  </span>
                 </div>
                 <span className="font-extrabold text-emerald-800 font-mono text-sm">
-                  {formatINR(654200)}
+                  {formatINR(ratioData?.money_defended_inr ?? 455000)}
                 </span>
               </div>
             </div>

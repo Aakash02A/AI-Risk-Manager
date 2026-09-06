@@ -9,8 +9,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.chargeback.responder.entity.Dispute;
+import com.chargeback.responder.entity.Prediction;
+import com.chargeback.responder.repository.DisputeRepository;
+import com.chargeback.responder.repository.PredictionRepository;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/risk")
@@ -21,6 +29,8 @@ public class RiskController {
     private final RiskConfigRepository riskConfigRepository;
     private final DisputeRatioStateRepository disputeRatioStateRepository;
     private final RatioDecisionEngine ratioDecisionEngine;
+    private final DisputeRepository disputeRepository;
+    private final PredictionRepository predictionRepository;
 
     @GetMapping("/ratio-status")
     public ResponseEntity<Map<String, Object>> getRatioStatus() {
@@ -48,6 +58,35 @@ public class RiskController {
             healthStatus = "HEALTHY";
         }
 
+        // Compute live active cases stats from database
+        List<Dispute> disputes = disputeRepository.findAll();
+        long totalLiveCases = disputes.size();
+        BigDecimal liveMoneyDefended = BigDecimal.ZERO;
+        BigDecimal liveTotalDisputed = BigDecimal.ZERO;
+        long liveStrongCount = 0;
+        long liveBorderlineCount = 0;
+        long liveWeakCount = 0;
+
+        for (Dispute d : disputes) {
+            if (d.getDisputeAmount() != null) {
+                liveTotalDisputed = liveTotalDisputed.add(d.getDisputeAmount());
+            }
+            Optional<Prediction> predOpt = predictionRepository.findTopByCaseIdOrderByCreatedAtDesc(d.getCaseId());
+            if (predOpt.isPresent()) {
+                String decision = predOpt.get().getDecision();
+                if ("STRONG".equalsIgnoreCase(decision)) {
+                    liveStrongCount++;
+                    if (d.getDisputeAmount() != null) {
+                        liveMoneyDefended = liveMoneyDefended.add(d.getDisputeAmount());
+                    }
+                } else if ("BORDERLINE".equalsIgnoreCase(decision)) {
+                    liveBorderlineCount++;
+                } else if ("WEAK".equalsIgnoreCase(decision)) {
+                    liveWeakCount++;
+                }
+            }
+        }
+
         Map<String, Object> status = new HashMap<>();
         status.put("loss_ratio", lossRatio);
         status.put("loss_ratio_pct", String.format("%.2f%%", lossRatio * 100));
@@ -67,7 +106,15 @@ public class RiskController {
         status.put("disputes_count", ratioState.getDisputesCount());
         status.put("disputes_lost_count", ratioState.getDisputesLostCount());
         status.put("disputes_won_count", ratioState.getDisputesWonCount());
-        status.put("updated_at", ratioState.getUpdatedAt());
+        status.put("active_cases_count", totalLiveCases);
+        status.put("money_defended_inr", liveMoneyDefended);
+        status.put("total_disputed_inr", liveTotalDisputed);
+        status.put("strong_cases_count", liveStrongCount);
+        status.put("borderline_cases_count", liveBorderlineCount);
+        status.put("weak_cases_count", liveWeakCount);
+        status.put("synced_timestamp_millis", System.currentTimeMillis());
+        status.put("updated_at", LocalDateTime.now().toString());
+        status.put("synced_at", LocalDateTime.now().toString());
 
         return ResponseEntity.ok(status);
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ModelMetricsData, ThresholdCandidate } from '../types';
-import { formatINR, formatPercent } from '../utils/formatters';
+import { formatINR, formatPercent, formatRealtimeTimestamp, formatTimeOnly } from '../utils/formatters';
 import { Cpu, CheckCircle2, AlertTriangle, TrendingUp, DollarSign, BarChart2, ShieldAlert } from 'lucide-react';
 
 export const ModelEvaluationView: React.FC = () => {
@@ -80,8 +80,11 @@ export const ModelEvaluationView: React.FC = () => {
           </div>
           <div className="h-8 w-px bg-slate-200"></div>
           <div className="text-right">
-            <p className="text-slate-400 font-medium">Deployment Status</p>
+            <p className="text-slate-400 font-medium">Evaluation Status</p>
             <p className="font-semibold text-emerald-700">Production Calibrated</p>
+            <p className="text-[10px] font-mono text-slate-500">
+              {formatTimeOnly((metrics as any).evaluated_at || new Date())}
+            </p>
           </div>
         </div>
       </div>

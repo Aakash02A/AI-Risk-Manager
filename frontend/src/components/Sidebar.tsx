@@ -62,29 +62,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Brand Header */}
       <div className="p-4 border-b border-slate-800">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-emerald-950/30">
-            <ShieldCheck className="w-6 h-6 text-slate-950" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-950/40">
+            <ShieldCheck className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-white tracking-tight leading-tight">
-              AI Risk Manager
-            </h1>
-            <p className="text-[11px] text-slate-400">Evidence Responder</p>
+            <div className="flex items-center space-x-1.5">
+              <h1 className="text-sm font-bold text-white tracking-tight leading-tight">
+                Razorpay Shield
+              </h1>
+              <span className="text-[9px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1 py-0.2 rounded">RZP</span>
+            </div>
+            <p className="text-[11px] text-slate-400">AI Dispute Assistant</p>
           </div>
         </div>
 
-        {/* Model Status Pill */}
-        <div className="mt-3 flex items-center justify-between bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-800/80">
+        {/* Ecosystem & Model Status Pill */}
+        <div className="mt-3 flex items-center justify-between bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/60">
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-[11px] font-medium text-emerald-400">ML Model Online</span>
+            <span className="text-[11px] font-medium text-emerald-400">Razorpay Live Sync</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono">v1.0</span>
+          <span className="text-[10px] text-sky-400 font-mono font-bold">v1.0</span>
         </div>
       </div>
+
 
       {/* Primary Action Button */}
       <div className="p-3">

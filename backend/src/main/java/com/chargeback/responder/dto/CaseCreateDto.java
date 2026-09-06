@@ -1,5 +1,6 @@
 package com.chargeback.responder.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +26,17 @@ public class CaseCreateDto {
     @NotNull(message = "days_since_order is required")
     private Integer daysSinceOrder;
 
+    @JsonProperty("payment_id")
+    private String paymentId;
+
+    @JsonProperty("razorpay_dispute_id")
+    private String razorpayDisputeId;
+
+    @JsonProperty("card_network")
+    private String cardNetwork;
+
     @Valid
     @NotNull(message = "evidence is required")
     private EvidenceDto evidence;
+
 }

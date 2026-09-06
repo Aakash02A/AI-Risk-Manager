@@ -9,6 +9,7 @@ import { AuditLogsView } from './components/AuditLogsView';
 import { CaseDetailModal } from './components/CaseDetailModal';
 import { NewCaseModal } from './components/NewCaseModal';
 import { ThresholdSettingsModal } from './components/ThresholdSettingsModal';
+import { RazorpayWebhookModal } from './components/RazorpayWebhookModal';
 import { DisputeCase, DashboardStats } from './types';
 
 export function App() {
@@ -26,6 +27,7 @@ export function App() {
   const [selectedCase, setSelectedCase] = useState<DisputeCase | null>(null);
   const [isNewCaseOpen, setIsNewCaseOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
 
   // Action pending states
   const [analyzingCaseId, setAnalyzingCaseId] = useState<string | null>(null);
@@ -227,6 +229,7 @@ export function App() {
           activeModule={activeModule}
           onOpenNewCase={() => setIsNewCaseOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenRazorpayWebhook={() => setIsWebhookModalOpen(true)}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
@@ -287,6 +290,16 @@ export function App() {
           onAnalyze={handleAnalyzeCase}
           onGenerateResponse={handleGenerateResponse}
           onDelete={handleDeleteCase}
+          onRefresh={() => {
+            fetchCases();
+            fetchStats();
+            if (selectedCase) {
+              fetch(`/api/cases/${selectedCase.case_id}`)
+                .then(r => r.json())
+                .then(data => setSelectedCase(data))
+                .catch(() => {});
+            }
+          }}
           isAnalyzing={analyzingCaseId === selectedCase.case_id}
           isGeneratingResponse={isGeneratingResponse}
         />
@@ -307,6 +320,16 @@ export function App() {
         currentWeak={weakThreshold}
         currentStrong={strongThreshold}
         onSave={handleSaveThresholds}
+      />
+
+      {/* Razorpay Dispute Webhook Ingestion Simulator Modal */}
+      <RazorpayWebhookModal
+        isOpen={isWebhookModalOpen}
+        onClose={() => setIsWebhookModalOpen(false)}
+        onSuccess={() => {
+          fetchCases();
+          fetchStats();
+        }}
       />
     </div>
   );

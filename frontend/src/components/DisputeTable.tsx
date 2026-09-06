@@ -1,6 +1,6 @@
 import React from 'react';
 import { DisputeCase, DisputeReason, Decision } from '../types';
-import { formatINR, formatPercent, formatReasonLabel, getDecisionBadgeColor } from '../utils/formatters';
+import { formatINR, formatPercent, formatReasonLabel, getDecisionBadgeColor, formatRealtimeTimestamp, formatRelativeTime } from '../utils/formatters';
 import { Search, Filter, ShieldCheck, AlertCircle, RefreshCw, Sparkles, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
 
 interface DisputeTableProps {
@@ -93,7 +93,7 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
-              <th className="py-3 px-4">Case ID</th>
+              <th className="py-3 px-4">Case & Razorpay ID</th>
               <th className="py-3 px-4">Disputed Amount</th>
               <th className="py-3 px-4">Reason</th>
               <th className="py-3 px-4">Age</th>
@@ -115,14 +115,35 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
                 return (
                   <tr
                     key={c.case_id}
-                    id={`case-row-${c.case_id}`}
-                    className="hover:bg-slate-50/75 transition-colors cursor-pointer"
+                    className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                     onClick={() => onSelectCase(c)}
                   >
-                    {/* Case ID */}
-                    <td className="py-3 px-4 font-mono font-medium text-slate-900">
-                      <div className="flex items-center space-x-1.5">
-                        <span>{c.case_id}</span>
+                    {/* Case ID and Razorpay Identifiers */}
+                    <td className="py-3 px-4 text-slate-900">
+                      <div className="flex flex-col">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-mono font-bold text-slate-900">{c.case_id}</span>
+                          {c.card_network && (
+                            <span className="text-[9px] font-extrabold px-1 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                              {c.card_network}
+                            </span>
+                          )}
+                          {c.razorpay_status === 'submitted' && (
+                            <span className="text-[9px] font-bold px-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                              Submitted
+                            </span>
+                          )}
+                          {c.razorpay_status === 'accepted' && (
+                            <span className="text-[9px] font-bold px-1 rounded bg-purple-50 text-purple-700 border border-purple-200">
+                              Refunded
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-1 text-[10px] font-mono text-slate-400 mt-0.5">
+                          <span className="text-blue-600">{c.razorpay_dispute_id || 'disp_rzp'}</span>
+                          <span>•</span>
+                          <span>{c.payment_id || 'pay_rzp'}</span>
+                        </div>
                       </div>
                     </td>
 
@@ -139,7 +160,7 @@ export const DisputeTable: React.FC<DisputeTableProps> = ({
                     </td>
 
                     {/* Age */}
-                    <td className="py-3 px-4 text-slate-500 font-mono">
+                    <td className="py-3 px-4 text-slate-600 font-mono font-medium">
                       {c.days_since_order}d ago
                     </td>
 

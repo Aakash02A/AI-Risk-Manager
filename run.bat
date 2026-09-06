@@ -29,8 +29,26 @@ if not exist ".env" (
     )
 )
 
+:: Ensure Python ML Microservice is running on port 5000
+netstat -ano | findstr /R /C:":5000 .*LISTENING" >nul 2>&1
+if errorlevel 1 (
+    echo [INFO] Starting Python ML Microservice on http://localhost:5000...
+    start "AI Risk Manager - ML Microservice (:5000)" /min cmd /c "cd /d "%~dp0ml" && python app.py"
+) else (
+    echo [OK] Python ML Microservice is already running on port 5000.
+)
+
+:: Ensure Java Spring Boot Backend is running on port 8080
+netstat -ano | findstr /R /C:":8080 .*LISTENING" >nul 2>&1
+if errorlevel 1 (
+    echo [INFO] Starting Java Spring Boot Backend on http://localhost:8080...
+    start "AI Risk Manager - Spring Boot Backend (:8080)" /min cmd /c "cd /d "%~dp0backend" && mvnw.cmd spring-boot:run"
+) else (
+    echo [OK] Java Spring Boot Backend is already running on port 8080.
+)
+
 echo Open browser at: http://localhost:3000
-echo Press Ctrl+C to stop the server.
+echo Press Ctrl+C to stop the Vite dev server.
 echo.
 
 where npm.cmd >nul 2>&1
@@ -39,3 +57,4 @@ if not errorlevel 1 (
 ) else (
     call npm run dev
 )
+

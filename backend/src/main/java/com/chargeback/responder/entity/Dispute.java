@@ -31,8 +31,26 @@ public class Dispute {
     @Column(name = "days_since_order", nullable = false)
     private Integer daysSinceOrder;
 
+    @Column(name = "payment_id", length = 64)
+    private String paymentId;
+
+    @Column(name = "razorpay_dispute_id", length = 64)
+    private String razorpayDisputeId;
+
+    @Column(name = "razorpay_status", length = 32)
+    @Builder.Default
+    private String razorpayStatus = "action_required";
+
+    @Column(name = "card_network", length = 32)
+    @Builder.Default
+    private String cardNetwork = "VISA";
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
     @OneToOne(mappedBy = "dispute", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Evidence evidence;
+
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -1,17 +1,18 @@
-# 🛡️ Chargeback Evidence Responder
+# 🛡️ Razorpay Dispute Shield (`AI-Risk-Manager`)
 
-> **An enterprise-grade, ML-driven SaaS platform for merchant payment dispute adjudication and evidence-grounded defense generation.**
+> **An enterprise-grade, ML-driven AI Dispute Defense & Loss-Ratio Shield built natively for the Razorpay Merchant Ecosystem.**
 
 ---
 
-## 1. Executive Summary & Problem Context
+## 1. Executive Summary & Razorpay Problem Context
 
-Payment chargebacks represent a major operational vulnerability for modern digital merchants. When cardholders dispute a transaction through their issuing bank (under Visa, Mastercard, or American Express dispute rules), merchants face a dilemma:
-- **Blindly contesting every dispute** causes high operational overhead, scheme arbitration penalty fees ($\approx ₹1,500$ per failed representation), and spikes in dispute loss ratios.
+Payment chargebacks represent a critical operational threat for digital businesses and D2C merchants accepting payments via **Razorpay**. When a cardholder disputes a transaction (via Visa, Mastercard, or RuPay) claiming *"Item Not Received"* or *"Unauthorized Transaction"*, Razorpay issues an `action_required` dispute with a strict deadline:
+- **Blindly contesting every dispute** causes high operational overhead, scheme arbitration penalty fees ($\approx ₹1,500$ per failed representation), and spikes in merchant dispute loss ratios.
 - **Blindly conceding every dispute** leaks substantial legitimate revenue on fraudulent "friendly fraud" or false claims.
-- **Exceeding the 1.50% loss ratio ceiling** triggers Card Scheme Acquirer Monitoring Program fines ($\ge ₹500,000$) or total payment processing revocation.
+- **Exceeding the 1.50% loss ratio ceiling** triggers Card Scheme Acquirer Monitoring Program (Visa VAMP / Mastercard ECP) penalties ($\ge ₹500,000$) and jeopardizes the merchant's Razorpay gateway processing privileges.
 
-The **Chargeback Evidence Responder** replaces manual guesswork with a calibrated machine learning classifier (`RandomForestClassifier`), an automated dynamic ratio-aware decision engine, and an evidence-grounded Large Language Model (Google Gemini) for drafting formal merchant defense rebuttal packages.
+The **Razorpay Dispute Shield** connects directly to Razorpay's dispute lifecycle. It ingests live Razorpay webhooks (`dispute.created`, `dispute.action_required`), scores disputes using a calibrated `RandomForestClassifier` trained on transaction and delivery evidence, dynamically scales win thresholds against the merchant's trailing dispute ratio, generates evidence-grounded AI rebuttal packages via Google Gemini, and submits contest/concede actions directly to Razorpay's Dispute API.
+
 
 ---
 
@@ -123,17 +124,32 @@ The system pre-seeds three evaluation cases on startup:
 ## 8. Running the System
 
 ### 1-Click Launch Steps
-1. **Start Python ML Service (Port 5000):**
-   ```cmd
-   python ml/app.py
-   ```
-2. **Start Java Spring Boot Backend (Port 8080):**
-   ```cmd
-   cd backend
-   mvn spring-boot:run
-   ```
-3. **Start React Frontend (Port 3000):**
+1. **Windows Launch via `run.bat`:**
    ```cmd
    run.bat
    ```
-   *Access dashboard at 👉 **`http://localhost:3000`***
+2. **Linux / macOS Launch via `run.sh`:**
+   ```bash
+   chmod +x run.sh
+   ./run.sh
+   ```
+3. **1-Command Docker Compose Launch:**
+   ```bash
+   docker compose up --build -d
+   ```
+   *Access dashboard at 👉 **`http://localhost:3000`** (or `http://localhost:8080` in production)*
+
+4. **Or Launch Individual Services:**
+   - **Python ML Service (Port 5000):** `python ml/app.py`
+   - **Java Spring Boot (Port 8080):** `cd backend && ./mvnw spring-boot:run`
+   - **React Frontend (Port 3000):** `npm run dev`
+
+---
+
+## 9. Comprehensive Guides & Pitch Playbook
+- **Production & Go-Live Guide**: 👉 **[`DEPLOYMENT.md`](DEPLOYMENT.md)**
+- **Enterprise Operations & 5-Min Executive Pitch Playbook**: 👉 **[`doc/ENTERPRISE_SYSTEM_AND_PITCH_GUIDE.md`](doc/ENTERPRISE_SYSTEM_AND_PITCH_GUIDE.md)**
+- **Technical Architecture & Data Pipeline**: 👉 **[`doc/PROJECT_DOCUMENTATION.md`](doc/PROJECT_DOCUMENTATION.md)**
+- **Quality Assurance & Testing Manual**: 👉 **[`doc/TESTER_GUIDE.md`](doc/TESTER_GUIDE.md)**
+
+

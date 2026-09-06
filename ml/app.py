@@ -58,6 +58,7 @@ class DisputePredictionRequest(BaseModel):
     customer_prior_dispute_count: int = Field(0, ge=0)
 
 class DisputePredictionResponse(BaseModel):
+    model_config = {'protected_namespaces': ()}
     win_probability: float
     model_name: str
     model_version: str
@@ -95,6 +96,15 @@ def evaluate_endpoint():
             return json.load(f)
     raise HTTPException(status_code=404, detail="Evaluation metrics not found. Run evaluate_model.py first.")
 
+@app.get("/thresholds")
+def thresholds_endpoint():
+    import json
+    thresholds_path = os.path.join(os.path.dirname(__file__), 'model', 'threshold_candidates.json')
+    if os.path.exists(thresholds_path):
+        with open(thresholds_path, 'r') as f:
+            return json.load(f)
+    raise HTTPException(status_code=404, detail="Threshold candidates not found. Run evaluate_thresholds.py first.")
+
 @app.post("/predict", response_model=DisputePredictionResponse)
 def predict_endpoint(payload: DisputePredictionRequest):
     try:
@@ -105,4 +115,6 @@ def predict_endpoint(payload: DisputePredictionRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000, reload=False)
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=False)
+

@@ -69,6 +69,8 @@ public class StatsController {
         stats.put("unclassified_count", unclassifiedCount);
         stats.put("money_defended_inr", moneyDefended);
         stats.put("total_disputed_inr", totalDisputed);
+        stats.put("synced_timestamp_millis", System.currentTimeMillis());
+        stats.put("synced_at", java.time.LocalDateTime.now().toString());
 
         return ResponseEntity.ok(stats);
     }
