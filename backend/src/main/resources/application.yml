@@ -31,7 +31,13 @@ app:
     strong: ${STRONG_THRESHOLD:0.70}
   llm:
     api-key: ${GEMINI_API_KEY:}
-    model: ${LLM_MODEL:gemini-3.8-flash}
+    model: ${LLM_MODEL:gemini-3.6-flash}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:rzp_test_shield2026}
+    key-secret: ${RAZORPAY_KEY_SECRET:rzp_sec_shield2026}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:whsec_rzp_shield2026}
+    api-url: ${RAZORPAY_API_URL:https://api.razorpay.com/v1}
+
 
 logging:
   level:

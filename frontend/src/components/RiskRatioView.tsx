@@ -15,6 +15,9 @@ import {
   AlertOctagon,
   Zap,
   HelpCircle,
+  X,
+  ExternalLink,
+  BookOpen,
 } from 'lucide-react';
 import { formatINR, formatPercent } from '../utils/formatters';
 
@@ -27,6 +30,7 @@ export const RiskRatioView: React.FC = () => {
 
   // Interactive Sandbox Simulator State
   const [simulatedLossRatio, setSimulatedLossRatio] = useState<number>(0.009);
+  const [isSchemeRulesModalOpen, setIsSchemeRulesModalOpen] = useState<boolean>(false);
 
   const fetchRatioStatus = async () => {
     setIsPolling(true);
@@ -607,20 +611,124 @@ export const RiskRatioView: React.FC = () => {
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>Powered by dynamic mathematical risk optimization</span>
-            <a
-              href="https://usa.visa.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-emerald-600 hover:text-emerald-700 font-semibold inline-flex items-center space-x-1"
+            <button
+              id="btn-scheme-rules-modal"
+              onClick={() => setIsSchemeRulesModalOpen(true)}
+              className="text-emerald-700 hover:text-emerald-800 font-semibold inline-flex items-center space-x-1 cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md border border-emerald-200 transition-colors"
             >
               <span>Card Scheme Rules</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Card Scheme Rules & Standards Modal */}
+      {isSchemeRulesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-slate-900 p-5 text-white flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Card Scheme Rules & Regulatory Standards
+                  </h3>
+                  <p className="text-xs text-slate-400">Visa VAMP, Mastercard ECP & Razorpay Dispute Guidelines</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsSchemeRulesModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 overflow-y-auto text-xs">
+              {/* Visa VAMP Standard */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-slate-900">Visa Acquirer Monitoring Program (VAMP)</span>
+                  <span className="font-mono font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[11px]">1.50% Ceiling</span>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  Visa monitors merchant dispute loss ratios on a 30-day trailing window. If a merchant's dispute ratio exceeds the <strong>1.50% statutory threshold</strong>, the merchant is placed in the Excessive Dispute Program with penalties starting at ₹5,00,000 ($5,000) per month, mandatory scheme arbitration fees of ₹1,500 ($500) per failed representment, and potential merchant account termination.
+                </p>
+                <div className="pt-1">
+                  <a
+                    href="https://usa.visa.com/support/consumer/visa-rules.html"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1 font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    <span>Official Visa Core Rules (usa.visa.com)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Visa Compelling Evidence 3.0 */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-slate-900">Visa Compelling Evidence 3.0 (CE 3.0)</span>
+                  <span className="font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[11px]">Evidence Standard</span>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  Effective April 2023, Visa CE 3.0 allows merchants to deflect fraud chargebacks pre-dispute by proving that the cardholder previously completed 2 or more undisputed transactions with matching IP address, device ID, or delivery address at least 120 days prior.
+                </p>
+                <div className="pt-1">
+                  <a
+                    href="https://usa.visa.com/partner-with-us/merchant-resources.html"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1 font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    <span>Visa Dispute Management Guidelines for Merchants</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Razorpay Dispute Protocol */}
+              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-blue-950">Razorpay Dispute Management & Deadlines</span>
+                  <span className="font-mono font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900 text-[11px]">7–10 Days SLA</span>
+                </div>
+                <p className="text-blue-900 leading-relaxed">
+                  Razorpay requires merchants to respond to <code>action_required</code> disputes before the bank-mandated cutoff date. Defenses must include formal rebuttal letters, carrier POD, invoices, and cardholder communications.
+                </p>
+                <div className="pt-1">
+                  <a
+                    href="https://razorpay.com/docs/payments/disputes/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1 font-semibold text-blue-700 hover:text-blue-800"
+                  >
+                    <span>Razorpay Dispute Documentation & API Reference</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-end">
+              <button
+                onClick={() => setIsSchemeRulesModalOpen(false)}
+                className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors"
+              >
+                Close Reference
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default RiskRatioView;

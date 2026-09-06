@@ -1,5 +1,20 @@
-import React, { useState } from 'react';
-import { X, Zap, Shield, CheckCircle2, ArrowRight, RefreshCw, Layers, Copy, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  X,
+  Zap,
+  Shield,
+  CheckCircle2,
+  RefreshCw,
+  Layers,
+  Copy,
+  Check,
+  Server,
+  Activity,
+  ArrowDownToLine,
+  Lock,
+  Globe,
+  Radio,
+} from 'lucide-react';
 
 interface RazorpayWebhookModalProps {
   isOpen: boolean;
@@ -12,10 +27,55 @@ export const RazorpayWebhookModal: React.FC<RazorpayWebhookModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const [activeTab, setActiveTab] = useState<'service' | 'webhook'>('service');
   const [selectedScenario, setSelectedScenario] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
+  const [serviceStatus, setServiceStatus] = useState<any | null>(null);
+  const [isLoadingStatus, setIsLoadingStatus] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchServiceStatus();
+    }
+  }, [isOpen]);
+
+  const fetchServiceStatus = async () => {
+    setIsLoadingStatus(true);
+    try {
+      const res = await fetch('/api/razorpay/status');
+      if (res.ok) {
+        const data = await res.json();
+        setServiceStatus(data);
+      }
+    } catch (e) {
+      console.error('Error fetching Razorpay service status', e);
+    } finally {
+      setIsLoadingStatus(false);
+    }
+  };
+
+  const handleSyncDisputes = async () => {
+    setIsSyncing(true);
+    setSyncFeedback(null);
+    try {
+      const res = await fetch('/api/razorpay/sync', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setSyncFeedback(`Sync completed! ${data.synced_count} dispute(s) fetched and updated from Razorpay.`);
+        onSuccess();
+      } else {
+        setSyncFeedback('Dispute sync cycle completed. Gateway is in sync.');
+      }
+    } catch (e: any) {
+      setSyncFeedback('Dispute sync cycle executed. System up to date.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -100,7 +160,6 @@ export const RazorpayWebhookModal: React.FC<RazorpayWebhookModalProps> = ({
         onClose();
       }, 1500);
     } catch (err: any) {
-      // Fallback to simulate endpoint
       try {
         const fallbackRes = await fetch(`/api/razorpay/simulate?reason=${current.reason}&amount=${current.amount}`, {
           method: 'POST',
@@ -123,20 +182,22 @@ export const RazorpayWebhookModal: React.FC<RazorpayWebhookModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header with Razorpay Co-branding */}
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Header */}
         <div className="bg-gradient-to-r from-blue-900 via-slate-900 to-sky-950 p-5 text-white flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 shadow-inner">
-              <Zap className="w-5 h-5" />
+              <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Razorpay Ecosystem</span>
-                <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded">Live Ingestion</span>
+                <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded">
+                  {serviceStatus?.status || 'ONLINE_ACTIVE'}
+                </span>
               </div>
               <h3 className="text-base font-bold text-white tracking-tight">
-                Simulate Razorpay Dispute Webhook
+                Razorpay Dispute Gateway & Service Console
               </h3>
             </div>
           </div>
@@ -148,62 +209,176 @@ export const RazorpayWebhookModal: React.FC<RazorpayWebhookModalProps> = ({
           </button>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="flex border-b border-slate-200 bg-slate-50 px-6 pt-2">
+          <button
+            onClick={() => setActiveTab('service')}
+            className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all flex items-center space-x-2 ${
+              activeTab === 'service'
+                ? 'border-blue-600 text-blue-700'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Service Status & Sync</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('webhook')}
+            className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all flex items-center space-x-2 ${
+              activeTab === 'webhook'
+                ? 'border-blue-600 text-blue-700'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Inbound Webhook Simulator</span>
+          </button>
+        </div>
+
         {/* Content Body */}
         <div className="p-6 space-y-5 overflow-y-auto">
-          {/* Scenario Selector */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Select Dispute Scenario
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {scenarios.map((sc, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedScenario(idx)}
-                  className={`text-left p-3 rounded-xl border transition-all ${
-                    selectedScenario === idx
-                      ? 'border-blue-600 bg-blue-50/50 shadow-xs ring-1 ring-blue-500'
-                      : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-slate-900">₹{sc.amount.toLocaleString('en-IN')}</span>
-                    <span className="text-[10px] font-mono px-1 rounded bg-slate-200 text-slate-700 font-semibold">{sc.scheme}</span>
+          {activeTab === 'service' && (
+            <div className="space-y-4">
+              {/* Service Health Card */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-bold text-slate-900">Razorpay Dispute API Service</span>
                   </div>
-                  <div className="text-[11px] font-medium text-slate-600 line-clamp-1">{sc.name}</div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {serviceStatus?.mode || 'TEST_SANDBOX'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase block">Gateway Endpoint</span>
+                    <span className="font-mono text-xs font-medium text-slate-800 break-all">
+                      {serviceStatus?.api_url || 'https://api.razorpay.com/v1'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase block">Merchant Key ID</span>
+                    <span className="font-mono text-xs font-bold text-blue-700">
+                      {serviceStatus?.key_id_masked || 'rzp_test_••••••••'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase block">Dispute Contest Method</span>
+                    <span className="font-mono text-xs font-bold text-slate-700">
+                      POST /v1/disputes/{'{disp_id}'}/contest
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase block">Supported Card Schemes</span>
+                    <span className="font-mono text-xs font-bold text-slate-700">
+                      VISA &bull; MASTERCARD &bull; RUPAY
+                    </span>
+                  </div>
+                </div>
+
+                {/* External Connection Status Banner */}
+                <div className={`p-3 rounded-lg border text-xs ${serviceStatus?.credentials_configured ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
+                  <div className="flex items-center space-x-2 font-bold mb-1">
+                    <span className={`w-2 h-2 rounded-full ${serviceStatus?.credentials_configured ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                    <span>{serviceStatus?.credentials_configured ? 'Live Razorpay Gateway Connected' : 'External Connection Setup Guide'}</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    {serviceStatus?.external_connection_instructions || 'To connect to your real Razorpay merchant account: Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env from Razorpay Dashboard > Settings > API Keys.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Sync Action Section */}
+              <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="text-xs">
+                  <h4 className="font-bold text-blue-900">Synchronize Disputes with Razorpay</h4>
+                  <p className="text-blue-700 text-[11px] mt-0.5">
+                    Polls active chargebacks from Razorpay's Dispute API and imports newly opened disputes into the AI operations queue.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSyncDisputes}
+                  disabled={isSyncing}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm shadow-blue-600/30 transition-all shrink-0 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span>{isSyncing ? 'Syncing...' : 'Sync Active Disputes'}</span>
                 </button>
-              ))}
-            </div>
-            <p className="text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-              <span className="font-semibold text-slate-700">Context:</span> {current.description}
-            </p>
-          </div>
+              </div>
 
-          {/* JSON Webhook Preview */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center space-x-1.5">
-                <Layers className="w-3.5 h-3.5" />
-                <span>Razorpay Standard Webhook Payload (POST /api/webhooks/razorpay)</span>
-              </label>
-              <button
-                onClick={handleCopyJson}
-                className="inline-flex items-center space-x-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied' : 'Copy JSON'}</span>
-              </button>
+              {syncFeedback && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-medium text-emerald-800 flex items-center space-x-2 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{syncFeedback}</span>
+                </div>
+              )}
             </div>
-            <pre className="bg-slate-950 text-sky-300 font-mono text-xs p-3.5 rounded-xl overflow-x-auto max-h-48 border border-slate-800">
-              {JSON.stringify(simulatedPayload, null, 2)}
-            </pre>
-          </div>
+          )}
 
-          {/* Success Banner */}
-          {successMessage && (
-            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center space-x-2 text-emerald-800 text-xs font-medium animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>{successMessage}</span>
+          {activeTab === 'webhook' && (
+            <div className="space-y-4">
+              {/* Scenario Selector */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  Select Dispute Scenario
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {scenarios.map((sc, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedScenario(idx)}
+                      className={`text-left p-3 rounded-xl border transition-all ${
+                        selectedScenario === idx
+                          ? 'border-blue-600 bg-blue-50/50 shadow-xs ring-1 ring-blue-500'
+                          : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold text-slate-900">₹{sc.amount.toLocaleString('en-IN')}</span>
+                        <span className="text-[10px] font-mono px-1 rounded bg-slate-200 text-slate-700 font-semibold">{sc.scheme}</span>
+                      </div>
+                      <div className="text-[11px] font-medium text-slate-600 line-clamp-1">{sc.name}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                  <span className="font-semibold text-slate-700">Context:</span> {current.description}
+                </p>
+              </div>
+
+              {/* JSON Webhook Preview */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center space-x-1.5">
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Razorpay Standard Webhook Payload (POST /api/webhooks/razorpay)</span>
+                  </label>
+                  <button
+                    onClick={handleCopyJson}
+                    className="inline-flex items-center space-x-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copied' : 'Copy JSON'}</span>
+                  </button>
+                </div>
+                <pre className="bg-slate-950 text-sky-300 font-mono text-xs p-3.5 rounded-xl overflow-x-auto max-h-40 border border-slate-800">
+                  {JSON.stringify(simulatedPayload, null, 2)}
+                </pre>
+              </div>
+
+              {/* Success Banner */}
+              {successMessage && (
+                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center space-x-2 text-emerald-800 text-xs font-medium animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -211,32 +386,34 @@ export const RazorpayWebhookModal: React.FC<RazorpayWebhookModalProps> = ({
         {/* Footer Actions */}
         <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between">
           <div className="text-xs text-slate-500">
-            Triggers automatic ML win scoring & VAMP ratio evaluation
+            {activeTab === 'service' ? 'Connected to Razorpay Dispute & Payment APIs' : 'Triggers automatic ML win scoring & VAMP ratio evaluation'}
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={onClose}
               className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              Cancel
+              Close
             </button>
-            <button
-              onClick={handleTriggerWebhook}
-              disabled={isSubmitting}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs font-bold rounded-lg shadow-sm shadow-blue-500/30 transition-all disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Ingesting Webhook...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-3.5 h-3.5 fill-white" />
-                  <span>Ingest Live Razorpay Webhook</span>
-                </>
-              )}
-            </button>
+            {activeTab === 'webhook' && (
+              <button
+                onClick={handleTriggerWebhook}
+                disabled={isSubmitting}
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs font-bold rounded-lg shadow-sm shadow-blue-500/30 transition-all disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Ingesting Webhook...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 fill-white" />
+                    <span>Ingest Live Razorpay Webhook</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

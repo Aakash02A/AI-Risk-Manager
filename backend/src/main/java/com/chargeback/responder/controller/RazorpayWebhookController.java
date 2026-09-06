@@ -19,6 +19,7 @@ import java.util.UUID;
 public class RazorpayWebhookController {
 
     private final CaseService caseService;
+    private final com.chargeback.responder.service.RazorpayService razorpayService;
 
     /**
      * Ingest live Razorpay webhook (e.g. dispute.created, dispute.action_required).
@@ -29,6 +30,15 @@ public class RazorpayWebhookController {
             @RequestHeader(value = "X-Razorpay-Signature", required = false) String signature
     ) {
         log.info("Received Razorpay webhook event: {}, signature present: {}", payload.get("event"), signature != null);
+
+        if (signature != null && !signature.isBlank() && !razorpayService.verifyWebhookSignature(payload.toString(), signature)) {
+            log.warn("Rejected Razorpay webhook due to HMAC SHA-256 signature verification failure.");
+            return ResponseEntity.status(401).body(Map.of(
+                    "status", "error",
+                    "message", "Invalid X-Razorpay-Signature: Webhook signature verification failed."
+            ));
+        }
+
         CaseResponseDto caseResponse = caseService.ingestRazorpayWebhook(payload);
 
         Map<String, Object> response = new HashMap<>();
@@ -38,6 +48,27 @@ public class RazorpayWebhookController {
         response.put("razorpay_dispute_id", caseResponse.getRazorpayDisputeId());
         response.put("payment_id", caseResponse.getPaymentId());
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get operational status, active mode, and endpoints of Razorpay Service.
+     */
+    @GetMapping("/razorpay/status")
+    public ResponseEntity<Map<String, Object>> getRazorpayStatus() {
+        return ResponseEntity.ok(razorpayService.getServiceStatus());
+    }
+
+    /**
+     * Trigger sync of open disputes from Razorpay Gateway API.
+     */
+    @PostMapping("/razorpay/sync")
+    public ResponseEntity<Map<String, Object>> syncRazorpayDisputes() {
+        int count = caseService.syncFromRazorpayService();
+        Map<String, Object> res = new HashMap<>();
+        res.put("status", "success");
+        res.put("message", "Dispute sync cycle completed from Razorpay Service");
+        res.put("synced_count", count);
+        return ResponseEntity.ok(res);
     }
 
     /**
@@ -77,11 +108,16 @@ public class RazorpayWebhookController {
     }
 
     /**
-     * Contest dispute directly on Razorpay portal.
+     * Contest dispute directly on Razorpay Dispute API with formal contest form payload.
      */
     @PostMapping("/cases/{caseId}/razorpay/contest")
-    public ResponseEntity<CaseResponseDto> contestOnRazorpay(@PathVariable String caseId) {
-        CaseResponseDto updated = caseService.contestOnRazorpay(caseId);
+    public ResponseEntity<CaseResponseDto> contestOnRazorpay(
+            @PathVariable String caseId,
+            @RequestBody(required = false) Map<String, String> body
+    ) {
+        String summary = body != null ? body.get("summary") : null;
+        String notes = body != null ? body.get("notes") : null;
+        CaseResponseDto updated = caseService.contestOnRazorpay(caseId, summary, notes);
         return ResponseEntity.ok(updated);
     }
 
@@ -93,4 +129,5 @@ public class RazorpayWebhookController {
         CaseResponseDto updated = caseService.acceptOnRazorpay(caseId);
         return ResponseEntity.ok(updated);
     }
+
 }

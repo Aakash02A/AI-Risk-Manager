@@ -9,9 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.NumberFormat;
 import java.time.Duration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -20,7 +18,7 @@ public class LlmOrchestrationService {
     @Value("${app.llm.api-key:}")
     private String apiKey;
 
-    @Value("${app.llm.model:gemini-3.8-flash}")
+    @Value("${app.llm.model:gemini-3.6-flash}")
     private String model;
 
     private final WebClient.Builder webClientBuilder;
@@ -81,52 +79,62 @@ public class LlmOrchestrationService {
 
         // If Gemini API Key is available, attempt real live LLM call
         if (apiKey != null && !apiKey.isBlank()) {
-            try {
-                String geminiEndpoint = String.format(
-                        "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
-                        model, apiKey
-                );
+            Set<String> modelsToTry = new LinkedHashSet<>();
+            if (model != null && !model.isBlank()) {
+                modelsToTry.add(model);
+            }
+            modelsToTry.add("gemini-3.6-flash");
+            modelsToTry.add("gemini-flash-latest");
 
-                Map<String, Object> requestBody = Map.of(
-                        "contents", List.of(
-                                Map.of("parts", List.of(Map.of("text", prompt)))
-                        )
-                );
+            for (String activeModel : modelsToTry) {
+                try {
+                    String geminiEndpoint = String.format(
+                            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
+                            activeModel, apiKey
+                    );
 
-                Map response = webClientBuilder.build()
-                        .post()
-                        .uri(geminiEndpoint)
-                        .bodyValue(requestBody)
-                        .retrieve()
-                        .bodyToMono(Map.class)
-                        .timeout(Duration.ofSeconds(10))
-                        .block();
+                    Map<String, Object> requestBody = Map.of(
+                            "contents", List.of(
+                                    Map.of("parts", List.of(Map.of("text", prompt)))
+                            )
+                    );
 
-                if (response != null && response.containsKey("candidates")) {
-                    List candidates = (List) response.get("candidates");
-                    if (!candidates.isEmpty()) {
-                        Map candidate = (Map) candidates.get(0);
-                        Map content = (Map) candidate.get("content");
-                        if (content != null && content.containsKey("parts")) {
-                            List parts = (List) content.get("parts");
-                            if (!parts.isEmpty()) {
-                                Map part = (Map) parts.get(0);
-                                String generatedText = (String) part.get("text");
-                                if (generatedText != null && !generatedText.isBlank()) {
-                                    log.info("Successfully generated live Gemini defense response for case {}", dispute.getCaseId());
-                                    return new RebuttalResult(generatedText.trim(), model + " (live-api)");
+                    Map response = webClientBuilder.build()
+                            .post()
+                            .uri(geminiEndpoint)
+                            .bodyValue(requestBody)
+                            .retrieve()
+                            .bodyToMono(Map.class)
+                            .timeout(Duration.ofSeconds(30))
+                            .block();
+
+                    if (response != null && response.containsKey("candidates")) {
+                        List candidates = (List) response.get("candidates");
+                        if (!candidates.isEmpty()) {
+                            Map candidate = (Map) candidates.get(0);
+                            Map content = (Map) candidate.get("content");
+                            if (content != null && content.containsKey("parts")) {
+                                List parts = (List) content.get("parts");
+                                if (!parts.isEmpty()) {
+                                    Map part = (Map) parts.get(0);
+                                    String generatedText = (String) part.get("text");
+                                    if (generatedText != null && !generatedText.isBlank()) {
+                                        log.info("Successfully generated live Google Gemini defense response for case {} using model {}", dispute.getCaseId(), activeModel);
+                                        return new RebuttalResult(generatedText.trim(), activeModel + " (Live Google AI Studio)");
+                                    }
                                 }
                             }
                         }
                     }
+                } catch (Exception e) {
+                    log.warn("Gemini model {} returned: {}. Trying next candidate model if available.", activeModel, e.getMessage());
                 }
-            } catch (Exception e) {
-                log.warn("Live Gemini API call failed or timed out for case {}: {}. Falling back to deterministic zero-hallucination engine.",
-                        dispute.getCaseId(), e.getMessage());
             }
+        } else {
+            log.info("GEMINI_API_KEY is not configured in .env. Applying statutory scheme rules template.");
         }
 
-        // Deterministic, zero-hallucination enterprise rebuttal engine fallback
+        // Deterministic, zero-hallucination enterprise rebuttal engine (Visa Core Rules / Mastercard)
         String fallbackRebuttal = String.format("""
                 FORMAL DISPUTE REBUTTAL PACKAGE
                 CASE ID: %s | CLAIM: %s | AMOUNT: ₹%.2f
@@ -149,6 +157,6 @@ public class LlmOrchestrationService {
                 evidence.getCustomerPriorDisputeCount()
         );
 
-        return new RebuttalResult(fallbackRebuttal.trim(), model + " (grounded-engine)");
+        return new RebuttalResult(fallbackRebuttal.trim(), "Scheme Rules Engine (Visa Sec 11.1 / Mastercard 4.2)");
     }
 }

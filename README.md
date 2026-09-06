@@ -47,17 +47,33 @@ The **Razorpay Dispute Shield** connects directly to Razorpay's dispute lifecycl
 
 ---
 
-## 3. Technology Stack
+## 3. Technology Stack & External Services
 
 - **Frontend**: React 19, Vite 6, Tailwind CSS, Lucide Icons (`http://localhost:3000`)
-- **Primary Backend**: Java 21 LTS, Spring Boot 3.2, Spring Data JPA, WebFlux WebClient (`http://localhost:8080`)
+- **Primary Backend**: Java 17/21 LTS, Spring Boot 3.2, Spring Data JPA, WebFlux WebClient (`http://localhost:8080`)
+- **Gateway Integration**: Razorpay Dispute & Payment APIs (`POST /v1/disputes/{disp_id}/contest`, `POST /v1/disputes/{disp_id}/accept`)
 - **ML Microservice**: Python 3.11, FastAPI, Scikit-Learn `RandomForestClassifier`, Joblib (`http://localhost:5000`)
-- **Database Ledger**: MySQL 8.0 DDL Schema with automatic zero-config H2 in-memory fallback
-- **AI Generator**: Google Gemini 3.8 Flash API with offline evidence-grounded Java engine fallback
+- **Database Ledger**: MySQL 8.0 DDL Schema with automatic Hikari connection pooling
+- **AI Generator**: Google Gemini 3.6 Flash REST API with scheme-rules statutory fallback
+- **Integration Guide**: See complete setup in [Real Services & External Connections Guide](doc/REAL_SERVICES_INTEGRATION_GUIDE.md)
 
 ---
 
-## 4. Machine Learning Pipeline & Dataset
+## 4. Required External Connections Checklist
+
+To run the application with 100% real live external connections:
+
+1. **Razorpay Merchant API Keys**: `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` from [Razorpay Dashboard](https://dashboard.razorpay.com/#/app/keys).
+2. **Razorpay Webhook Secret**: `RAZORPAY_WEBHOOK_SECRET` for verifying inbound dispute webhooks.
+3. **Google Gemini API Key**: `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/app/apikey).
+4. **MySQL Database**: `MYSQL_URL`, `MYSQL_USERNAME`, `MYSQL_PASSWORD`.
+5. **Python ML Service**: Running on port 5000 (`ml/app.py`).
+
+👉 For step-by-step instructions with screenshots and command references, see [doc/REAL_SERVICES_INTEGRATION_GUIDE.md](doc/REAL_SERVICES_INTEGRATION_GUIDE.md).
+
+---
+
+## 5. Machine Learning Pipeline & Dataset
 
 ### Dataset Specifications
 - **Total Records:** 10,000 synthetic chargeback dispute cases.

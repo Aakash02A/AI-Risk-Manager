@@ -21,6 +21,7 @@ import {
   Send,
   Zap,
 } from 'lucide-react';
+import { RazorpayServiceFormModal } from './RazorpayServiceFormModal';
 
 interface CaseDetailModalProps {
   disputeCase: DisputeCase | null;
@@ -49,6 +50,7 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
   const [isSubmittingRazorpay, setIsSubmittingRazorpay] = useState(false);
   const [isAcceptingRazorpay, setIsAcceptingRazorpay] = useState(false);
   const [razorpayFeedback, setRazorpayFeedback] = useState<string | null>(null);
+  const [showRazorpayContestForm, setShowRazorpayContestForm] = useState(false);
 
   // Reset confirmation state whenever selected case changes
   React.useEffect(() => {
@@ -545,12 +547,11 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                 {pred?.decision === 'STRONG' && def?.response_text && c.razorpay_status !== 'submitted' && (
                   <button
                     id="btn-contest-razorpay"
-                    onClick={handleContestRazorpay}
-                    disabled={isSubmittingRazorpay}
-                    className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold text-xs shadow-xs disabled:opacity-50"
+                    onClick={() => setShowRazorpayContestForm(true)}
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold text-xs shadow-xs transition-transform active:scale-95"
                   >
-                    <Send className={`w-3.5 h-3.5 ${isSubmittingRazorpay ? 'animate-spin' : ''}`} />
-                    <span>{isSubmittingRazorpay ? 'Submitting...' : 'Submit Contest to Razorpay'}</span>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Contest via Razorpay Form</span>
                   </button>
                 )}
 
@@ -657,6 +658,16 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Razorpay Dispute Service Contest Form Modal */}
+      <RazorpayServiceFormModal
+        isOpen={showRazorpayContestForm}
+        onClose={() => setShowRazorpayContestForm(false)}
+        disputeCase={c}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
     </div>
   );
 };

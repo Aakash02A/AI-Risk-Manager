@@ -74,16 +74,16 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </div>
 
-          {/* Simulate Razorpay Webhook Button */}
+          {/* Razorpay Gateway Service Button */}
           {onOpenRazorpayWebhook && (
             <button
               id="btn-simulate-razorpay-webhook"
               onClick={onOpenRazorpayWebhook}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-blue-200 rounded-lg text-xs font-bold text-blue-800 bg-blue-50/90 hover:bg-blue-100 transition-colors shadow-2xs"
-              title="Simulate incoming Razorpay dispute webhook"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 border border-blue-300 rounded-lg text-xs font-bold text-blue-900 bg-blue-50/90 hover:bg-blue-100 transition-colors shadow-2xs"
+              title="Razorpay Dispute Gateway Status, Live Sync & Webhook Console"
             >
               <Zap className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
-              <span>Razorpay Webhook</span>
+              <span>Razorpay Service</span>
             </button>
           )}
 
